@@ -8,6 +8,12 @@ build/
 *.o
 *.obj
 
+# IDE-specific project dir/files
+nbproject
+
+# Generated test files
+test/testAll.xml
+
 # Precompiled Headers
 *.gch
 *.pch

@@ -6,7 +6,7 @@ ODIR = ../build
 SRC_DIR = ../src
 LIB_DIR = ../lib
 
-INCS = -I./ -I$(SRC_DIR) -I$(IDIR) -I/usr/include/gtest/ -L$(LIB_DIR)
+INCS = -I./ -I$(SRC_DIR) -I$(IDIR) -L$(LIB_DIR)
 LIBS = -lgtest -lgtest_main -lpthread
 VPATH = $(SRC_DIR)
 
