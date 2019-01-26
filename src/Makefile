@@ -5,7 +5,7 @@ IDIR = ../include
 ODIR = ../build
 LIB_DIR = ../lib
 INCS = -I$(IDIR) -L$(LIB_DIR)
-LIBS = -lcurl -ljsoncpp
+LIBS = -lcurl -ljsoncpp -lpthread
 
 SOURCES = main.cpp Addition.cpp Multiply.cpp HttpClient.cpp UserInputValidator.cpp
 

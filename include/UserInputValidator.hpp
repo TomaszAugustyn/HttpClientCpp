@@ -17,15 +17,15 @@ class UserInputValidator : public IValidator {
         void validate(ParameterMapPtr paramMap);
         
     private:
-        unsigned short int m_port;
-        std::string m_domainNameOrIP;
+        std::string m_port;
+        std::string m_hostName;
         std::string m_username;
         std::string m_password;
         
-        void validateDomainNameOrIP(const std::string &domainNameOrIP);
+        void validateHostNameAndPort(ParameterMapPtr paramMap);
         void validatePort(const std::string &port);
-        void validateUsername(const std::string &username);
-        void validatePassword(const std::string &password);
+        void validateUsername(ParameterMapPtr paramMap);
+        void validatePassword(ParameterMapPtr paramMap);
     
 };
 

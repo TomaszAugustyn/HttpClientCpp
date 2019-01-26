@@ -13,14 +13,14 @@
 class HttpClient 
 {
     public:
-        HttpClient(const std::string &domainNameOrIP,
-                   unsigned short int port,
+        HttpClient(const std::string &hostName,
+                   const std::string &port,
                    const std::string &username,
                    const std::string &password);
         
     private:
-        const std::string m_domainNameOrIP;
-        const unsigned short int m_port;
+        const std::string m_hostName;
+        const std::string m_port;
         const std::string m_username;
         const std::string m_password;
 };

@@ -73,7 +73,7 @@ std::string DownloadJSON(std::string URL)
 int main()
 {
     
-    DownloadJSON("http://styx.fibaro.com:9999/api/devices");
+    DownloadJSON("styx.fibaro.com:9999/api/devices");
     return 0;
 }
 
