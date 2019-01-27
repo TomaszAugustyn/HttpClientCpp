@@ -1,10 +1,13 @@
-#include <curl/curl.h>
 #include <stdio.h>
 #include <iostream>
-#include <sstream>
+#include <stdexcept>
+#include "boost/scoped_ptr.hpp"
+#include "curl/curl.h"
 #include "HttpClient.hpp"
+#include "UserInputValidator.hpp"
+#include "TemperatureSensor.hpp"
 
-static std::string *DownloadedResponse;
+/*static std::string *DownloadedResponse;
 
 static int writer(char *data, size_t size, size_t nmemb, std::string *buffer_in)
 {
@@ -31,7 +34,6 @@ std::string DownloadJSON(std::string URL)
     CURL *curl;
     CURLcode res;
     struct curl_slist *headers=NULL; // init to NULL is important 
-    std::ostringstream oss;
     headers = curl_slist_append(headers, "Accept: application/json");  
     headers = curl_slist_append(headers, "Content-Type: application/json");
     headers = curl_slist_append(headers, "charsets: utf-8"); 
@@ -67,13 +69,41 @@ std::string DownloadJSON(std::string URL)
 
     curl_slist_free_all(headers);
     return "";
-}
+}*/
 
 
 int main()
 {
+    //DownloadJSON("styx.fibaro.com:9999/api/devices");
+    //DownloadJSON("styx.fibaro.com:9999/api/refreshStates?last=311409");
+    std::string ip = "", port = "", username = "", password = "";
+    boost::shared_ptr<std::map<std::string, std::string> > paramMap(new std::map<std::string, std::string>());
+    boost::scoped_ptr<HttpClient> httpClientPtr;
+    UserInputValidator validator;
+      
+    try{
+        std::cout << "Enter IP address/hostname of the central: ";
+        getline(std::cin, (*paramMap)["hostName"], '\n');
+        std::cout << "Enter port number [0-65535]: ";
+        getline(std::cin, (*paramMap)["port"], '\n');
+        std::cout << "Enter username: ";
+        getline(std::cin, (*paramMap)["username"], '\n');
+        std::cout << "Enter password: ";
+        getline(std::cin, (*paramMap)["password"], '\n');
+        
+        validator.validate(paramMap);
+        httpClientPtr.reset(new HttpClient(validator.getHostName(), 
+                                           validator.getPort(),
+                                           validator.getUsername(),
+                                           validator.getPassword()));
+
+        httpClientPtr->getDevicesFromAPI(TemperatureSensor::DEVICE_TYPE_TEMP_SENSOR);
+         
+    }
+    catch(const std::invalid_argument &e){
+        std::cout << "An Exception occured: " << e.what() << std::endl;
+    }
     
-    DownloadJSON("styx.fibaro.com:9999/api/devices");
     return 0;
 }
 

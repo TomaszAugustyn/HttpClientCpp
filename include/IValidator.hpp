@@ -11,13 +11,14 @@
 #include <map>
 #include "boost/shared_ptr.hpp"
 
-using ParameterMapPtr = boost::shared_ptr<std::map<std::string, std::string>>;
+using ParameterMapPtr = boost::shared_ptr<std::map<std::string, std::string> >;
 
 class IValidator{
     
     public:
         virtual void validate(ParameterMapPtr paramMap) = 0;
-        virtual ~IValidator(){}
+        virtual ~IValidator() = default;
+        
 };
 
 

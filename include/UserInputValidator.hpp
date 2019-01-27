@@ -14,7 +14,13 @@
 class UserInputValidator : public IValidator {
     
     public:
+        UserInputValidator();
         void validate(ParameterMapPtr paramMap);
+        
+        std::string getPort() const;
+        std::string getHostName() const;
+        std::string getUsername() const;
+        std::string getPassword() const;
         
     private:
         std::string m_port;

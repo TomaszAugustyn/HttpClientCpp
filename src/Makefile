@@ -7,9 +7,9 @@ LIB_DIR = ../lib
 INCS = -I$(IDIR) -L$(LIB_DIR)
 LIBS = -lcurl -ljsoncpp -lpthread
 
-SOURCES = main.cpp Addition.cpp Multiply.cpp HttpClient.cpp UserInputValidator.cpp
+SOURCES = main.cpp Addition.cpp Multiply.cpp HttpClient.cpp UserInputValidator.cpp TemperatureSensor.cpp Device.cpp
 
-_HEADERS = Addition.hpp Multiply.hpp HttpClient.hpp UserInputValidator.hpp IValidator.hpp
+_HEADERS = Addition.hpp Multiply.hpp HttpClient.hpp UserInputValidator.hpp IValidator.hpp TemperatureSensor.hpp Device.hpp
 HEADERS = $(patsubst %,$(IDIR)/%,$(_HEADERS))
 
 _OBJS = $(SOURCES:.cpp=.o)

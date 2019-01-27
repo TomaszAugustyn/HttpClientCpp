@@ -9,6 +9,9 @@
 #define HTTPCLIENT_HPP
 
 #include <string>
+#include <vector>
+#include "Device.hpp"
+#include "boost/shared_ptr.hpp"
 
 class HttpClient 
 {
@@ -17,6 +20,8 @@ class HttpClient
                    const std::string &port,
                    const std::string &username,
                    const std::string &password);
+        
+        std::vector<boost::shared_ptr<Device>> getDevicesFromAPI(const std::string &deviceType);
         
     private:
         const std::string m_hostName;
