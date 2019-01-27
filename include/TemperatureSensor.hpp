@@ -14,12 +14,13 @@ class TemperatureSensor : public Device {
     
     public:
         TemperatureSensor();
-        TemperatureSensor(int id, const std::string& name, double value);
+        TemperatureSensor(const std::string &id, const std::string &name, const std::string &value);
         static const std::string DEVICE_TYPE_TEMP_SENSOR;
-        void setValue(double value);       
+        void setValue(const std::string &value);
+        std::string getValue() const; 
         
     private:
-        double m_value;
+        std::string m_value;
 };
 
 #endif /* TEMPERATURESENSOR_HPP */

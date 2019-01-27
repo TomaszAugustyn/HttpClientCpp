@@ -14,11 +14,13 @@ class Device {
     
     public:
         Device();
-        Device(int id, const std::string &name);
+        Device(const std::string &id, const std::string &name);
         virtual ~Device() = default;
+        std::string getID() const;
+        std::string getName() const;     
         
     protected:
-        int m_id;
+        std::string m_id;
         std::string m_name;
         
 };
