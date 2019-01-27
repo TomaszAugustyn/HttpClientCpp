@@ -10,6 +10,7 @@
 
 #include <string>
 #include <vector>
+#include <cstddef> 
 #include "Device.hpp"
 #include "boost/shared_ptr.hpp"
 
@@ -28,6 +29,11 @@ class HttpClient
         const std::string m_port;
         const std::string m_username;
         const std::string m_password;
+        
+        std::string m_curlBuffer;
+        static size_t curlWriterCallbackFunc(char *data, size_t size, size_t nmemb, void *p);
+        size_t curlWriterCallbackFunc_impl(char *data, size_t size, size_t nmemb);
+        
 };
 
 

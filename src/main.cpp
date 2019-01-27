@@ -81,29 +81,33 @@ int main()
     boost::scoped_ptr<HttpClient> httpClientPtr;
     UserInputValidator validator;
       
-    try{
-        std::cout << "Enter IP address/hostname of the central: ";
-        getline(std::cin, (*paramMap)["hostName"], '\n');
-        std::cout << "Enter port number [0-65535]: ";
-        getline(std::cin, (*paramMap)["port"], '\n');
-        std::cout << "Enter username: ";
-        getline(std::cin, (*paramMap)["username"], '\n');
-        std::cout << "Enter password: ";
-        getline(std::cin, (*paramMap)["password"], '\n');
-        
-        validator.validate(paramMap);
-        httpClientPtr.reset(new HttpClient(validator.getHostName(), 
-                                           validator.getPort(),
-                                           validator.getUsername(),
-                                           validator.getPassword()));
+    while(true) {
+        try{
+            std::cout << "Enter IP address/hostname of the central: ";
+            getline(std::cin, (*paramMap)["hostName"], '\n');
+            std::cout << "Enter port number [0-65535]: ";
+            getline(std::cin, (*paramMap)["port"], '\n');
+            std::cout << "Enter username: ";
+            getline(std::cin, (*paramMap)["username"], '\n');
+            std::cout << "Enter password: ";
+            getline(std::cin, (*paramMap)["password"], '\n');
 
-        httpClientPtr->getDevicesFromAPI(TemperatureSensor::DEVICE_TYPE_TEMP_SENSOR);
-         
-    }
-    catch(const std::invalid_argument &e){
-        std::cout << "An Exception occured: " << e.what() << std::endl;
+            validator.validate(paramMap);
+            break;
+        }
+        catch(const std::invalid_argument &e){
+            std::cout << "An Exception occured: " << e.what() << std::endl;
+            std::cout << "Please try entering parameters again." << std::endl;
+        }
     }
     
+    httpClientPtr.reset(new HttpClient(validator.getHostName(), 
+                                               validator.getPort(),
+                                               validator.getUsername(),
+                                               validator.getPassword()));
+
+    httpClientPtr->getDevicesFromAPI(TemperatureSensor::DEVICE_TYPE_TEMP_SENSOR);  
+
     return 0;
 }
 
