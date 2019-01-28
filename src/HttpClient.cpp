@@ -13,7 +13,8 @@ HttpClient::HttpClient(const std::string &hostName, const std::string &port,
                         m_username(username),
                         m_password(password),
                         m_refreshStateLast(""),
-                        m_curlBuffer("")
+                        m_buffer4GetDevices(""),
+                        m_buffer4RefreshStates("")
                         
 {
     
@@ -36,23 +37,33 @@ void HttpClient::printDevices(){
     }
 }
 
-size_t HttpClient::curlWriterCallbackFunc(char *data, size_t size, size_t nmemb, void *p)
+size_t HttpClient::writerCallback4DevicesQuery(char *data, size_t size, size_t nmemb, void *p)
 {
-    return static_cast<HttpClient*>(p)->curlWriterCallbackFunc_impl(data, size, nmemb);
+    return static_cast<HttpClient*>(p)->writerCallback4DevicesQuery_impl(data, size, nmemb);
 }
 
-size_t HttpClient::curlWriterCallbackFunc_impl(char *data, size_t size, size_t nmemb)
+size_t HttpClient::writerCallback4DevicesQuery_impl(char *data, size_t size, size_t nmemb)
 {
-    m_curlBuffer.append(data, size * nmemb);
+    m_buffer4GetDevices.append(data, size * nmemb);
+    return size * nmemb;
+}
+
+size_t HttpClient::writerCallback4RefreshQuery(char *data, size_t size, size_t nmemb, void *p)
+{
+    return static_cast<HttpClient*>(p)->writerCallback4RefreshQuery_impl(data, size, nmemb);
+}
+
+size_t HttpClient::writerCallback4RefreshQuery_impl(char *data, size_t size, size_t nmemb)
+{
+    m_buffer4RefreshStates.append(data, size * nmemb);
     return size * nmemb;
 }
 
 void HttpClient::queryAPI(const std::string &deviceType, CallType callType){
-    
+    std::cout<< "HttpClient::queryAPI,  deviceType = " << deviceType <<std::endl;
     CURL *curl;
     CURLcode res;
     struct curl_slist *headers = NULL;
-    //auto pFunc = callType == GET_DEVICES? curlWriterCallbackFunc : (callType == REFRESH_STATE? )
     std::string jsonStr = "";
     std::string userPwd = std::string(m_username).append(":").append(m_password);
     std::string URL = m_hostName;
@@ -60,13 +71,15 @@ void HttpClient::queryAPI(const std::string &deviceType, CallType callType){
         URL.append(":").append(m_port);
     }
     if(callType == GET_DEVICES){
-        URL.append("/api/devices");      
+        URL.append("/api/devices");  
+        std::cout<< "GET_DEVICES  " << "m_refreshStateLast = " << m_refreshStateLast <<std::endl;
     }
     else if(callType == REFRESH_STATE){
         URL.append("/api/refreshStates");
         if(!m_refreshStateLast.empty()){
             URL.append("?last=").append(m_refreshStateLast);
         }
+        std::cout<< "REFRESH_STATE" << "m_refreshStateLast = " << m_refreshStateLast <<std::endl;
     }
     
     headers = curl_slist_append(headers, "Accept: application/json");  
@@ -82,8 +95,13 @@ void HttpClient::queryAPI(const std::string &deviceType, CallType callType){
         curl_easy_setopt(curl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
         curl_easy_setopt(curl, CURLOPT_USERPWD, userPwd.c_str());
         curl_easy_setopt(curl, CURLOPT_WRITEDATA, this);
-        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, this->curlWriterCallbackFunc);
         //curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L); //uncomment to enable verbosity
+        if(callType == GET_DEVICES){
+            curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, this->writerCallback4DevicesQuery);
+        }
+        else if(callType == REFRESH_STATE){
+            curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, this->writerCallback4RefreshQuery);
+        } 
         res = curl_easy_perform(curl);
 
         if (CURLE_OK == res) 
@@ -102,7 +120,13 @@ void HttpClient::queryAPI(const std::string &deviceType, CallType callType){
 
     curl_slist_free_all(headers); 
     curl_easy_cleanup(curl); 
-    m_curlBuffer.clear();
+    if(callType == GET_DEVICES){
+        m_buffer4GetDevices.clear();
+    }
+    else if(callType == REFRESH_STATE){
+        m_buffer4RefreshStates.clear();
+    } 
+    
     
 }
 
@@ -110,7 +134,7 @@ void HttpClient::addDevices(const std::string &deviceType){
     
     Json::Value root;
     Json::Reader reader;
-    bool parsingSuccessful = reader.parse(m_curlBuffer, root);
+    bool parsingSuccessful = reader.parse(m_buffer4GetDevices, root);
     if (!parsingSuccessful)
     {
         std::cout << "Error parsing the string" << std::endl;
@@ -153,7 +177,7 @@ void HttpClient::handleRefreshState(const std::string &deviceType){
     
     Json::Value root;
     Json::Reader reader;
-    bool parsingSuccessful = reader.parse(m_curlBuffer, root);
+    bool parsingSuccessful = reader.parse(m_buffer4RefreshStates, root);
     if (!parsingSuccessful)
     {
         std::cout << "Error parsing the string" << std::endl;

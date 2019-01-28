@@ -39,9 +39,16 @@ class HttpClient
         std::vector<boost::shared_ptr<Device> > m_devices;
       
         std::string m_refreshStateLast;
-        std::string m_curlBuffer;
-        static size_t curlWriterCallbackFunc(char *data, size_t size, size_t nmemb, void *p);
-        size_t curlWriterCallbackFunc_impl(char *data, size_t size, size_t nmemb);
+        
+        // separate buffer for queryAPI of type "GET_DEVICES"
+        std::string m_buffer4GetDevices;
+        static size_t writerCallback4DevicesQuery(char *data, size_t size, size_t nmemb, void *p);
+        size_t writerCallback4DevicesQuery_impl(char *data, size_t size, size_t nmemb);
+        
+        // separate buffer for queryAPI of type "REFRESH_STATE"
+        std::string m_buffer4RefreshStates;
+        static size_t writerCallback4RefreshQuery(char *data, size_t size, size_t nmemb, void *p);
+        size_t writerCallback4RefreshQuery_impl(char *data, size_t size, size_t nmemb);
         
         void addDevices(const std::string &deviceType);
         void addTemperatureSensors(const Json::Value &root);
