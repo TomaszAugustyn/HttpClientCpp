@@ -53,7 +53,7 @@ void keyPress(boost::shared_ptr<HttpClient> ptr){
     //char key = ' '; 
     while(true){
         if(_kbhit()){
-            std::cout<<"keyPress!!" <<std::endl;
+            std::cout << "Key pressed, refreshing..." <<std::endl;
             tcflush(0, TCIFLUSH);
             ptr->queryAPI(TemperatureSensor::DEVICE_TYPE_TEMP_SENSOR, HttpClient::GET_DEVICES);
         }

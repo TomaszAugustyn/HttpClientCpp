@@ -26,6 +26,7 @@ std::vector<boost::shared_ptr<Device> > HttpClient::getGetvices() const{
 
 void HttpClient::printDevices(){
     system("clear");
+    std::cout << std::endl;
     for (auto &device : m_devices){
         std::cout << "deviceID: " << device->getID() << " deviceName: " << device->getName();
         if(boost::shared_ptr<TemperatureSensor> temp = boost::dynamic_pointer_cast<TemperatureSensor>(device)) {
@@ -35,6 +36,7 @@ void HttpClient::printDevices(){
             std::cout << std::endl;
         }
     }
+    std::cout << std::endl;
 }
 
 size_t HttpClient::writerCallback4DevicesQuery(char *data, size_t size, size_t nmemb, void *p)
