@@ -23,8 +23,13 @@ class HttpClient
                    const std::string &username,
                    const std::string &password);
         
-        void getDevicesFromAPI(const std::string &deviceType);
+        enum CallType{
+            GET_DEVICES, REFRESH_STATE
+        };
+        
+        void queryAPI(const std::string &deviceType, CallType callType);
         std::vector<boost::shared_ptr<Device> > getGetvices() const;
+        void printDevices();
         
     private:
         const std::string m_hostName;
@@ -33,13 +38,15 @@ class HttpClient
         const std::string m_password;
         std::vector<boost::shared_ptr<Device> > m_devices;
       
+        std::string m_refreshStateLast;
         std::string m_curlBuffer;
         static size_t curlWriterCallbackFunc(char *data, size_t size, size_t nmemb, void *p);
         size_t curlWriterCallbackFunc_impl(char *data, size_t size, size_t nmemb);
         
         void addDevices(const std::string &deviceType);
         void addTemperatureSensors(const Json::Value &root);
-        
+        void handleRefreshState(const std::string &deviceType);
+        void refreshTemperatureSensors(const Json::Value &root);
 };
 
 

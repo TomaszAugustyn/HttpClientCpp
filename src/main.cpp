@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <iostream>
 #include <stdexcept>
+#include <unistd.h>
 #include "boost/scoped_ptr.hpp"
 #include "curl/curl.h"
 #include "HttpClient.hpp"
@@ -44,8 +45,13 @@ int main()
     
     httpClientPtr.reset(new HttpClient("styx.fibaro.com", "9999", "admin", "admin"));
 
-    httpClientPtr->getDevicesFromAPI(TemperatureSensor::DEVICE_TYPE_TEMP_SENSOR); 
-    
+    httpClientPtr->queryAPI(TemperatureSensor::DEVICE_TYPE_TEMP_SENSOR, HttpClient::GET_DEVICES); 
+    sleep(2);
+    httpClientPtr->queryAPI(TemperatureSensor::DEVICE_TYPE_TEMP_SENSOR, HttpClient::REFRESH_STATE); 
+    sleep(3);
+    while (true){
+        httpClientPtr->queryAPI(TemperatureSensor::DEVICE_TYPE_TEMP_SENSOR, HttpClient::REFRESH_STATE);
+    }   
 
     return 0;
 }

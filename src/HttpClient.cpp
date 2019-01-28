@@ -3,6 +3,7 @@
 #include "boost/make_shared.hpp"
 #include "TemperatureSensor.hpp"
 #include <iostream>
+#include <stdlib.h>
 
 
 HttpClient::HttpClient(const std::string &hostName, const std::string &port, 
@@ -11,9 +12,28 @@ HttpClient::HttpClient(const std::string &hostName, const std::string &port,
                         m_port(port), 
                         m_username(username),
                         m_password(password),
+                        m_refreshStateLast(""),
                         m_curlBuffer("")
+                        
 {
     
+}
+
+std::vector<boost::shared_ptr<Device> > HttpClient::getGetvices() const{
+    return m_devices;
+}
+
+void HttpClient::printDevices(){
+    system("clear");
+    for (auto &device : m_devices){
+        std::cout << "deviceID: " << device->getID() << " deviceName: " << device->getName();
+        if(boost::shared_ptr<TemperatureSensor> temp = boost::dynamic_pointer_cast<TemperatureSensor>(device)) {
+            std::cout << " current value: " << temp->getValue() << std::endl;
+        }
+        else{
+            std::cout << std::endl;
+        }
+    }
 }
 
 size_t HttpClient::curlWriterCallbackFunc(char *data, size_t size, size_t nmemb, void *p)
@@ -27,19 +47,28 @@ size_t HttpClient::curlWriterCallbackFunc_impl(char *data, size_t size, size_t n
     return size * nmemb;
 }
 
-void HttpClient::getDevicesFromAPI(const std::string &deviceType){
+void HttpClient::queryAPI(const std::string &deviceType, CallType callType){
     
     CURL *curl;
     CURLcode res;
     struct curl_slist *headers = NULL;
+    //auto pFunc = callType == GET_DEVICES? curlWriterCallbackFunc : (callType == REFRESH_STATE? )
     std::string jsonStr = "";
     std::string userPwd = std::string(m_username).append(":").append(m_password);
     std::string URL = m_hostName;
     if(!m_port.empty()){
         URL.append(":").append(m_port);
     }
-    URL.append("/api/devices");
-    //URL.append("/api/refreshStates");
+    if(callType == GET_DEVICES){
+        URL.append("/api/devices");      
+    }
+    else if(callType == REFRESH_STATE){
+        URL.append("/api/refreshStates");
+        if(!m_refreshStateLast.empty()){
+            URL.append("?last=").append(m_refreshStateLast);
+        }
+    }
+    
     headers = curl_slist_append(headers, "Accept: application/json");  
     headers = curl_slist_append(headers, "Content-Type: application/json");
     headers = curl_slist_append(headers, "charsets: utf-8"); 
@@ -54,17 +83,16 @@ void HttpClient::getDevicesFromAPI(const std::string &deviceType){
         curl_easy_setopt(curl, CURLOPT_USERPWD, userPwd.c_str());
         curl_easy_setopt(curl, CURLOPT_WRITEDATA, this);
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, this->curlWriterCallbackFunc);
-        curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+        //curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L); //uncomment to enable verbosity
         res = curl_easy_perform(curl);
 
         if (CURLE_OK == res) 
         { 
-            char *ct; // memory will br freed automatically by "curl_easy_cleanup"
-            res = curl_easy_getinfo(curl, CURLINFO_CONTENT_TYPE, &ct);
-            if((CURLE_OK == res) && ct)
-            {
-                std::cout << "Content-Type: " << ct << std::endl << std::endl;  
+            if(callType == GET_DEVICES){
                 addDevices(deviceType);
+            }
+            else if(callType == REFRESH_STATE){
+                handleRefreshState(deviceType);
             }
         }
         else{
@@ -76,10 +104,6 @@ void HttpClient::getDevicesFromAPI(const std::string &deviceType){
     curl_easy_cleanup(curl); 
     m_curlBuffer.clear();
     
-}
-
-std::vector<boost::shared_ptr<Device> > HttpClient::getGetvices() const{
-    return m_devices;
 }
 
 void HttpClient::addDevices(const std::string &deviceType){
@@ -99,13 +123,12 @@ void HttpClient::addDevices(const std::string &deviceType){
 
 void HttpClient::addTemperatureSensors(const Json::Value &root){
     
-    for( Json::Value::const_iterator outer = root.begin() ; outer != root.end() ; outer++ )
+    for( Json::Value::const_iterator iter = root.begin() ; iter != root.end() ; iter++ )
     {
-        if ((*outer)["type"] == TemperatureSensor::DEVICE_TYPE_TEMP_SENSOR){
-            std::string deviceID = (*outer)["id"].asString();
-            std::string deviceName = (*outer)["name"].asString();
-            std::string currentValue = (*outer)["properties"]["value"].asString();
-            std::cout << "deviceID: " << deviceID << " deviceName: " << deviceName << " current value: " << currentValue <<std::endl;
+        if ((*iter)["type"] == TemperatureSensor::DEVICE_TYPE_TEMP_SENSOR){
+            std::string deviceID = (*iter)["id"].asString();
+            std::string deviceName = (*iter)["name"].asString();
+            std::string currentValue = (*iter)["properties"]["value"].asString();
             bool createNewTempSensor = true;
             // check if they are already in m_devices vector
             for (auto &device : m_devices){
@@ -123,5 +146,48 @@ void HttpClient::addTemperatureSensors(const Json::Value &root){
             }
         }              
     } 
+    printDevices();
+}
+
+void HttpClient::handleRefreshState(const std::string &deviceType){
+    
+    Json::Value root;
+    Json::Reader reader;
+    bool parsingSuccessful = reader.parse(m_curlBuffer, root);
+    if (!parsingSuccessful)
+    {
+        std::cout << "Error parsing the string" << std::endl;
+    }
+    
+    if(deviceType == TemperatureSensor::DEVICE_TYPE_TEMP_SENSOR){
+        refreshTemperatureSensors(root);
+    }
     
 }
+
+void HttpClient::refreshTemperatureSensors(const Json::Value &root){
+   
+    if(m_refreshStateLast.empty()){
+        m_refreshStateLast = root["last"].asString();
+        return;
+    }
+    bool valueChanged = false;
+    m_refreshStateLast = root["last"].asString();
+    Json::Value changesArray = root["changes"];
+    for( Json::Value::const_iterator iter = changesArray.begin() ; iter != changesArray.end() ; iter++ )
+    {
+        std::string deviceID = (*iter)["id"].asString();
+        for (auto &device : m_devices){
+            if(device->getID() == deviceID){
+                if(boost::shared_ptr<TemperatureSensor> temp = boost::dynamic_pointer_cast<TemperatureSensor>(device)) {
+                    std::string newValue = (*iter)["value"].asString();
+                    temp->setValue(newValue); //set new value
+                    valueChanged = true;
+                }
+            }  
+        }
+    }
+    if(valueChanged)
+        printDevices();
+}
+
