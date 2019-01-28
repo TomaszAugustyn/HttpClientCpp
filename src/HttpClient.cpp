@@ -60,7 +60,7 @@ size_t HttpClient::writerCallback4RefreshQuery_impl(char *data, size_t size, siz
 }
 
 void HttpClient::queryAPI(const std::string &deviceType, CallType callType){
-    std::cout<< "HttpClient::queryAPI,  deviceType = " << deviceType <<std::endl;
+    
     CURL *curl;
     CURLcode res;
     struct curl_slist *headers = NULL;
@@ -79,7 +79,7 @@ void HttpClient::queryAPI(const std::string &deviceType, CallType callType){
         if(!m_refreshStateLast.empty()){
             URL.append("?last=").append(m_refreshStateLast);
         }
-        std::cout<< "REFRESH_STATE" << "m_refreshStateLast = " << m_refreshStateLast <<std::endl;
+        std::cout<< "REFRESH_STATE  " << "m_refreshStateLast = " << m_refreshStateLast <<std::endl;
     }
     
     headers = curl_slist_append(headers, "Accept: application/json");  
