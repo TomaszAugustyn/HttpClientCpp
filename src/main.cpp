@@ -7,7 +7,6 @@
 #include <thread>
 #include <future>
 #include <stdio.h>
-#include "curl/curl.h"
 #include "HttpClient.hpp"
 #include "UserInputValidator.hpp"
 #include "TemperatureSensor.hpp"
@@ -94,13 +93,18 @@ int main()
     
     //httpClientPtr.reset(new HttpClient("styx.fibaro.com", "9999", "admin", "admin"));
 
-    httpClientPtr->queryAPI(TemperatureSensor::DEVICE_TYPE_TEMP_SENSOR, HttpClient::GET_DEVICES); 
-    
-    auto f = std::async(std::launch::async, keyPress, httpClientPtr);
-    
-    while (true){
-        httpClientPtr->queryAPI(TemperatureSensor::DEVICE_TYPE_TEMP_SENSOR, HttpClient::REFRESH_STATE);
-    }   
+    try{
+        httpClientPtr->queryAPI(TemperatureSensor::DEVICE_TYPE_TEMP_SENSOR, HttpClient::GET_DEVICES);    
+        auto f = std::async(std::launch::async, keyPress, httpClientPtr);
+        while (true){
+            httpClientPtr->queryAPI(TemperatureSensor::DEVICE_TYPE_TEMP_SENSOR, HttpClient::REFRESH_STATE);
+        } 
+    }
+    catch(const std::runtime_error &e){
+        std::cout << "An Exception occured: " << e.what() << std::endl;
+        return 1;
+    }
+  
 
     return 0;
 }

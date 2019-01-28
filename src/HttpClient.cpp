@@ -1,9 +1,10 @@
 #include "HttpClient.hpp"
-#include "curl/curl.h"
 #include "boost/make_shared.hpp"
 #include "TemperatureSensor.hpp"
 #include <iostream>
 #include <stdlib.h>
+#include <cstring>
+#include <stdexcept>
 
 
 HttpClient::HttpClient(const std::string &hostName, const std::string &port, 
@@ -20,11 +21,7 @@ HttpClient::HttpClient(const std::string &hostName, const std::string &port,
     
 }
 
-std::vector<boost::shared_ptr<Device> > HttpClient::getGetvices() const{
-    return m_devices;
-}
-
-void HttpClient::printDevices(){
+void HttpClient::printDevices() const{
     system("clear");
     std::cout << std::endl;
     for (auto &device : m_devices){
@@ -64,7 +61,8 @@ size_t HttpClient::writerCallback4RefreshQuery_impl(char *data, size_t size, siz
 void HttpClient::queryAPI(const std::string &deviceType, CallType callType){
     
     CURL *curl;
-    CURLcode res;
+    CURLcode res; 
+    char errbuf[CURL_ERROR_SIZE];
     struct curl_slist *headers = NULL;
     std::string jsonStr = "";
     std::string userPwd = std::string(m_username).append(":").append(m_password);
@@ -91,6 +89,7 @@ void HttpClient::queryAPI(const std::string &deviceType, CallType callType){
 
     if (curl) 
     {
+        curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, errbuf);
         curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
         curl_easy_setopt(curl, CURLOPT_URL, URL.c_str());
         curl_easy_setopt(curl, CURLOPT_HTTPGET, 1); 
@@ -104,6 +103,7 @@ void HttpClient::queryAPI(const std::string &deviceType, CallType callType){
         else if(callType == REFRESH_STATE){
             curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, this->writerCallback4RefreshQuery);
         } 
+        errbuf[0] = 0;
         res = curl_easy_perform(curl);
 
         if (CURLE_OK == res) 
@@ -116,7 +116,7 @@ void HttpClient::queryAPI(const std::string &deviceType, CallType callType){
             }
         }
         else{
-            std::cout<< "ERROR";
+            handleCurlError(errbuf, res);
         }
     }
 
@@ -128,7 +128,16 @@ void HttpClient::queryAPI(const std::string &deviceType, CallType callType){
     else if(callType == REFRESH_STATE){
         m_buffer4RefreshStates.clear();
     } 
+}
+
+void HttpClient::handleCurlError(char *errbuf, CURLcode &res){
     
+    size_t len = strlen(errbuf);
+    fprintf(stderr, "\nlibcurl: (%d) ", res);
+    if(len)
+        fprintf(stderr, "%s%s", errbuf, ((errbuf[len - 1] != '\n') ? "\n" : ""));
+    else
+        fprintf(stderr, "%s\n", curl_easy_strerror(res));
     
 }
 
@@ -136,10 +145,13 @@ void HttpClient::addDevices(const std::string &deviceType){
     
     Json::Value root;
     Json::Reader reader;
+    if(m_buffer4GetDevices.empty()){
+        throw std::runtime_error("Buffer m_buffer4GetDevices is empty! Probably got empty response from curl.");
+    }
     bool parsingSuccessful = reader.parse(m_buffer4GetDevices, root);
     if (!parsingSuccessful)
     {
-        std::cout << "Error parsing the string" << std::endl;
+        throw std::runtime_error("Failed to parse JSON! Dumping string: " + std::string(m_buffer4GetDevices));
     }
     if(deviceType == TemperatureSensor::DEVICE_TYPE_TEMP_SENSOR){
         addTemperatureSensors(root);
@@ -179,12 +191,14 @@ void HttpClient::handleRefreshState(const std::string &deviceType){
     
     Json::Value root;
     Json::Reader reader;
+    if(m_buffer4RefreshStates.empty()){
+        throw std::runtime_error("Buffer m_buffer4RefreshStates is empty! Probably got empty response from curl.");
+    }
     bool parsingSuccessful = reader.parse(m_buffer4RefreshStates, root);
     if (!parsingSuccessful)
     {
-        std::cout << "Error parsing the string" << std::endl;
-    }
-    
+        throw std::runtime_error("Failed to parse JSON! Dumping string: " + std::string(m_buffer4RefreshStates));
+    }   
     if(deviceType == TemperatureSensor::DEVICE_TYPE_TEMP_SENSOR){
         refreshTemperatureSensors(root);
     }

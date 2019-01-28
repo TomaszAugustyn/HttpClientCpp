@@ -14,6 +14,7 @@
 #include "Device.hpp"
 #include "boost/shared_ptr.hpp"
 #include "jsoncpp/json/json.h"
+#include "curl/curl.h"
 
 class HttpClient 
 {
@@ -28,8 +29,7 @@ class HttpClient
         };
         
         void queryAPI(const std::string &deviceType, CallType callType);
-        std::vector<boost::shared_ptr<Device> > getGetvices() const;
-        void printDevices();
+        void printDevices() const;
         
     private:
         const std::string m_hostName;
@@ -54,6 +54,7 @@ class HttpClient
         void addTemperatureSensors(const Json::Value &root);
         void handleRefreshState(const std::string &deviceType);
         void refreshTemperatureSensors(const Json::Value &root);
+        void handleCurlError(char *errbuf, CURLcode &res);
 };
 
 
