@@ -11,9 +11,9 @@ Http client in C++ for monitoring devices in Home Center
   * $ cd boost_1_69_0
   * $ sudo ./bootstrap.sh --prefix=/usr/local --with-libraries=all
   * $ sudo ./b2 install
-  * Add the Boost libraries path to the default Ubuntu library search path
+  * Add the Boost libraries path to the default Ubuntu library search path <br />
 	$ sudo /bin/bash -c 'echo "/usr/local/lib" > /etc/ld.so.conf.d/boost.conf'
-  * Update the default Ubuntu library search paths
+  * Update the default Ubuntu library search paths <br />
 	$ sudo ldconfig
 
 
@@ -27,14 +27,14 @@ Http client in C++ for monitoring devices in Home Center
   * $ make
   * $ sudo cp -a include/gtest /usr/include
   * $ sudo cp -a libgtest_main.so libgtest.so /usr/lib/
-  * Check if the GNU Linker knows the libs
+  * Check if the GNU Linker knows the libs <br />
 	$ sudo ldconfig -v | grep gtest
 	
 
 ### libcurl ###
 
   * $ sudo apt-get install libcurl4-gnutls-dev
-  * Check Linker
+  * Check Linker <br />
 	$ sudo ldconfig -v | grep curl 
   * Append LIBS with -lcurl in your Makefile
 
@@ -49,13 +49,13 @@ Http client in C++ for monitoring devices in Home Center
  
   * $ git clone https://github.com/TomaszAugustyn/HttpClientCpp.git
   * $ cd HttpClientCpp
-  * Build application and tests from root directory
+  * Build application and tests from root directory <br />
     $ make
-  * To run application:
-    $ cd src/
+  * To run application: <br />
+    $ cd src/ <br />
 	$ make run
-  * To run tests:
-    $ cd test/
+  * To run tests: <br />
+    $ cd test/ <br />
 	$ make runTests
 	
 
