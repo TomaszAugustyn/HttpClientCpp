@@ -1,5 +1,5 @@
 CXX = g++
-CXXFLAGS = -g -Wall
+CXXFLAGS = -g -Wall -std=c++14
 
 IDIR = ../include
 ODIR = ../build

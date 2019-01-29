@@ -69,7 +69,7 @@ int main()
     while(true) {
         try{
             std::cout << "Enter IP address/hostname of the central: ";
-            getline(std::cin, (*paramMap)["hostName"], '\n');
+            getline(std::cin, (*paramMap)["hostname"], '\n');
             std::cout << "Enter port number [0-65535]: ";
             getline(std::cin, (*paramMap)["port"], '\n');
             std::cout << "Enter username: ";
@@ -91,7 +91,7 @@ int main()
                                                validator.getUsername(),
                                                validator.getPassword()));
     
-    //httpClientPtr.reset(new HttpClient("styx.fibaro.com", "9999", "admin", "admin"));
+    //httpClientPtr.reset(new HttpClient("styx.fibaro.com", "9999", "admin", "admin")); // for testing
 
     try{
         httpClientPtr->queryAPI(TemperatureSensor::DEVICE_TYPE_TEMP_SENSOR, HttpClient::GET_DEVICES);    

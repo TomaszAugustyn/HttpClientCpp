@@ -1,5 +1,5 @@
 CXX = g++
-CXXFLAGS = -g -Wall
+CXXFLAGS = -g -Wall -std=c++14
 
 IDIR = ../include
 ODIR = ../build
@@ -7,10 +7,10 @@ SRC_DIR = ../src
 LIB_DIR = ../lib
 
 INCS = -I./ -I$(SRC_DIR) -I$(IDIR) -L$(LIB_DIR)
-LIBS = -lgtest -lgtest_main -lpthread
+LIBS = -lgtest -lgtest_main -lcurl -ljsoncpp -lpthread
 VPATH = $(SRC_DIR)
 
-_OBJS = Addition.o Addition_Test.o  Multiply.o Multiply_Test.o  
+_OBJS = UserInputValidator.o UserInputValidatorTest.o Device.o TemperatureSensor.o HttpClient.o HttpClientTest.o
 OBJS = $(patsubst %,$(ODIR)/%,$(_OBJS))
 
 EXECUTABLE = $(ODIR)/testAll

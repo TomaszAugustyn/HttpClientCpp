@@ -9,9 +9,10 @@
 #define USERINPUTVALIDATOR_HPP
 
 #include "IValidator.hpp"
+#include "gtest/gtest_prod.h"
 
 
-class UserInputValidator : public IValidator {
+class UserInputValidator : public IValidator {  
     
     public:
         UserInputValidator();
@@ -28,10 +29,12 @@ class UserInputValidator : public IValidator {
         std::string m_username;
         std::string m_password;
         
-        void validateHostNameAndPort(ParameterMapPtr paramMap);
+        void validateHostnameAndPort(ParameterMapPtr paramMap);
         void validatePort(const std::string &port);
         void validateUsername(ParameterMapPtr paramMap);
         void validatePassword(ParameterMapPtr paramMap);
+        
+        friend class UserInputValidatorTest;
     
 };
 

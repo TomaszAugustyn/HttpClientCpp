@@ -10,7 +10,7 @@ UserInputValidator::UserInputValidator(){
 
 void UserInputValidator::validate(ParameterMapPtr paramMap){
     
-    validateHostNameAndPort(paramMap);
+    validateHostnameAndPort(paramMap);
     validateUsername(paramMap);
     validatePassword(paramMap);
 }
@@ -31,7 +31,7 @@ std::string UserInputValidator::getPassword() const{
     return m_password;
 }
 
-void UserInputValidator::validateHostNameAndPort(ParameterMapPtr paramMap){
+void UserInputValidator::validateHostnameAndPort(ParameterMapPtr paramMap){
     
     std::map<std::string, std::string>::iterator it; 
     std::string hostName = "";
@@ -41,10 +41,10 @@ void UserInputValidator::validateHostNameAndPort(ParameterMapPtr paramMap){
         validatePort(it->second); 
     }
     else{
-        throw std::invalid_argument( "There is no key \"port\" in the paramMap!" );
+        throw std::invalid_argument( "There is no key 'port' in the paramMap!" );
     } 
     
-    it = paramMap->find("hostName");
+    it = paramMap->find("hostname");
     if (it != paramMap->end()){  
         hostName = it->second;
         try{
@@ -64,7 +64,7 @@ void UserInputValidator::validateHostNameAndPort(ParameterMapPtr paramMap){
         }
     }
     else{
-        throw std::invalid_argument( "There is no key \"hostName\" in the paramMap!" );
+        throw std::invalid_argument( "There is no key 'hostName' in the paramMap!" );
     }
     
     m_hostName = hostName;
@@ -83,10 +83,10 @@ void UserInputValidator::validatePort(const std::string &port){
         if(portNr >= 0 && portNr < 65536)
             m_port = port;
         else
-            throw std::invalid_argument( "\"port\" value exceeds port numbers' range [0-65535]!" );       
+            throw std::invalid_argument( "'port' value exceeds port numbers' range [0-65535]!" );       
     }
     catch (const boost::bad_lexical_cast& e){      
-        throw std::invalid_argument( "\"port\" could not be casted to numeric value! Exception: " + std::string(e.what()) ); 
+        throw std::invalid_argument( "'port' could not be casted to numeric value! Exception: " + std::string(e.what()) ); 
     }
     
 }
@@ -99,10 +99,10 @@ void UserInputValidator::validateUsername(ParameterMapPtr paramMap){
     it = paramMap->find("username");
     if (it != paramMap->end()){
         if((it->second).empty())
-            throw std::invalid_argument( "\"username\" value is empty!" ); 
+            throw std::invalid_argument( "'username' value is empty!" ); 
     }
     else{
-        throw std::invalid_argument( "There is no key \"username\" in the paramMap!" );
+        throw std::invalid_argument( "There is no key 'username' in the paramMap!" );
     }
     
     m_username = it->second;
@@ -116,10 +116,10 @@ void UserInputValidator::validatePassword(ParameterMapPtr paramMap){
     it = paramMap->find("password");
     if (it != paramMap->end()){
         if((it->second).empty())
-            throw std::invalid_argument( "\"password\" value is empty!" ); 
+            throw std::invalid_argument( "'password' value is empty!" ); 
     }
     else{
-        throw std::invalid_argument( "There is no key \"password\" in the paramMap!" );
+        throw std::invalid_argument( "There is no key 'password' in the paramMap!" );
     }
 
     m_password = it->second;
