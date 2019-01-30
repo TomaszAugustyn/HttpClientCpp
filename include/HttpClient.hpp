@@ -30,12 +30,14 @@ class HttpClient
         
         void queryAPI(const std::string &deviceType, CallType callType);
         void printDevices() const;
+        void setTimeout(unsigned long timeout);
         
     private:
         const std::string m_hostName;
         const std::string m_port;
         const std::string m_username;
         const std::string m_password;
+        unsigned long m_timeout;
         std::vector<boost::shared_ptr<Device> > m_devices;
       
         std::string m_refreshStateLast;
@@ -55,6 +57,8 @@ class HttpClient
         void handleRefreshState(const std::string &deviceType);
         void refreshTemperatureSensors(const Json::Value &root);
         void handleCurlError(char *errbuf, CURLcode &res);
+        
+        friend class HttpClientTest;
 };
 
 

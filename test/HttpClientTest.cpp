@@ -1,6 +1,7 @@
 #include <limits.h>
 #include "gtest/gtest.h"
 #include "HttpClient.hpp"
+#include <memory>
 
 class HttpClientTest : public ::testing::Test {
  protected:
@@ -9,6 +10,8 @@ class HttpClientTest : public ::testing::Test {
 
   virtual void TearDown() {
   }
+  
+  std::unique_ptr<HttpClient> httpClientPtr;
 };
 
 TEST_F(HttpClientTest, test){

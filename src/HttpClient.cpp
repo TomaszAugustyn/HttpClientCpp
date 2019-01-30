@@ -1,5 +1,5 @@
 #include "HttpClient.hpp"
-#include "boost/make_shared.hpp"
+#include "boost/lexical_cast.hpp"
 #include "TemperatureSensor.hpp"
 #include <iostream>
 #include <stdlib.h>
@@ -13,6 +13,7 @@ HttpClient::HttpClient(const std::string &hostName, const std::string &port,
                         m_port(port), 
                         m_username(username),
                         m_password(password),
+                        m_timeout(30L),
                         m_refreshStateLast(""),
                         m_buffer4GetDevices(""),
                         m_buffer4RefreshStates("")
@@ -34,6 +35,10 @@ void HttpClient::printDevices() const{
         }
     }
     std::cout << std::endl;
+}
+
+void HttpClient::setTimeout(unsigned long timeout){
+    m_timeout = timeout;
 }
 
 size_t HttpClient::writerCallback4DevicesQuery(char *data, size_t size, size_t nmemb, void *p)
@@ -96,6 +101,7 @@ void HttpClient::queryAPI(const std::string &deviceType, CallType callType){
         curl_easy_setopt(curl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
         curl_easy_setopt(curl, CURLOPT_USERPWD, userPwd.c_str());
         curl_easy_setopt(curl, CURLOPT_WRITEDATA, this);
+        curl_easy_setopt(curl, CURLOPT_TIMEOUT, m_timeout); //timeout in seconds
         //curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L); //uncomment to enable verbosity
         if(callType == GET_DEVICES){
             curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, this->writerCallback4DevicesQuery);
@@ -133,12 +139,17 @@ void HttpClient::queryAPI(const std::string &deviceType, CallType callType){
 void HttpClient::handleCurlError(char *errbuf, CURLcode &res){
     
     size_t len = strlen(errbuf);
-    fprintf(stderr, "\nlibcurl: (%d) ", res);
-    if(len)
-        fprintf(stderr, "%s%s", errbuf, ((errbuf[len - 1] != '\n') ? "\n" : ""));
-    else
-        fprintf(stderr, "%s\n", curl_easy_strerror(res));
+    std::string errMsg = "\nlibcurl: ";
+    errMsg.append("(").append(boost::lexical_cast<std::string>(res)).append(") ");
     
+    if(len){
+        (errbuf[len - 1] != '\n') ? errMsg.append(errbuf).append("\n") : errMsg.append(errbuf);
+    }
+    else{
+       errMsg.append(curl_easy_strerror(res)).append("\n");
+    }       
+    
+    throw std::runtime_error(errMsg);
 }
 
 void HttpClient::addDevices(const std::string &deviceType){
