@@ -13,17 +13,21 @@ HttpClient::HttpClient(const std::string &hostName, const std::string &port,
                         m_port(port), 
                         m_username(username),
                         m_password(password),
-                        m_timeout(30L),
+                        m_timeout(0L),
+                        m_runningUnitTest(false),
                         m_refreshStateLast(""),
                         m_buffer4GetDevices(""),
                         m_buffer4RefreshStates("")
                         
 {
-    
+
 }
 
 void HttpClient::printDevices() const{
-    system("clear");
+    
+    if (!m_runningUnitTest){
+        system("clear"); //system("clear") during running unit tests will make the results poorly readable (scattered in console)
+    }
     std::cout << std::endl;
     for (auto &device : m_devices){
         std::cout << "deviceID: " << device->getID() << " deviceName: " << device->getName();
@@ -39,6 +43,10 @@ void HttpClient::printDevices() const{
 
 void HttpClient::setTimeout(unsigned long timeout){
     m_timeout = timeout;
+}
+
+void HttpClient::setRunningUnitTest(bool runningUnitTest){
+    m_runningUnitTest = runningUnitTest;
 }
 
 size_t HttpClient::writerCallback4DevicesQuery(char *data, size_t size, size_t nmemb, void *p)

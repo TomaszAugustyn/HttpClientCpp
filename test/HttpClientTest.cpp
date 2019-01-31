@@ -27,6 +27,7 @@ class HttpClientTest : public ::testing::Test {
 TEST_F(HttpClientTest, queryAPIGetDevices_noThrow){
     
     httpClientPtr = std::make_unique<HttpClient>("styx.fibaro.com", "9999", "admin", "admin");
+    httpClientPtr->setRunningUnitTest(true);
     ASSERT_NO_THROW( httpClientPtr->queryAPI(TemperatureSensor::DEVICE_TYPE_TEMP_SENSOR, HttpClient::GET_DEVICES) );
 
 }
@@ -34,7 +35,8 @@ TEST_F(HttpClientTest, queryAPIGetDevices_noThrow){
 TEST_F(HttpClientTest, queryAPIGetDevices_Throw){
     
     httpClientPtr = std::make_unique<HttpClient>("amazon.com", "5566", "franeklowcabramek", "asdzxc");
-    httpClientPtr->setTimeout(5L);
+    httpClientPtr->setRunningUnitTest(true);
+    httpClientPtr->setTimeout(5L);   
     EXPECT_THROW({
         try{
             httpClientPtr->queryAPI(TemperatureSensor::DEVICE_TYPE_TEMP_SENSOR, HttpClient::GET_DEVICES);
@@ -50,6 +52,7 @@ TEST_F(HttpClientTest, queryAPIGetDevices_Throw){
 TEST_F(HttpClientTest, queryAPIRefreshStates_noThrow){
     
     httpClientPtr = std::make_unique<HttpClient>("styx.fibaro.com", "9999", "admin", "admin");
+    httpClientPtr->setRunningUnitTest(true);
     httpClientPtr->queryAPI(TemperatureSensor::DEVICE_TYPE_TEMP_SENSOR, HttpClient::GET_DEVICES);
     ASSERT_NO_THROW( httpClientPtr->queryAPI(TemperatureSensor::DEVICE_TYPE_TEMP_SENSOR, HttpClient::REFRESH_STATE) );
     ASSERT_NO_THROW( httpClientPtr->queryAPI(TemperatureSensor::DEVICE_TYPE_TEMP_SENSOR, HttpClient::REFRESH_STATE) );
@@ -59,6 +62,7 @@ TEST_F(HttpClientTest, queryAPIRefreshStates_noThrow){
 TEST_F(HttpClientTest, queryAPIRefreshStates_Throw){
     
     httpClientPtr = std::make_unique<HttpClient>("spacex.com", "2000", "elonmusk", "morestarshipsplease111");
+    httpClientPtr->setRunningUnitTest(true);
     httpClientPtr->setTimeout(5L);
     EXPECT_THROW({
         try{

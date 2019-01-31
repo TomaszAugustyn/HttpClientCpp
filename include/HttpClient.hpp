@@ -31,6 +31,7 @@ class HttpClient
         void queryAPI(const std::string &deviceType, CallType callType);
         void printDevices() const;
         void setTimeout(unsigned long timeout);
+        void setRunningUnitTest(bool runningUnitTest);
         
     private:
         const std::string m_hostName;
@@ -38,6 +39,7 @@ class HttpClient
         const std::string m_username;
         const std::string m_password;
         unsigned long m_timeout;
+        bool m_runningUnitTest;
         std::vector<boost::shared_ptr<Device> > m_devices;
       
         std::string m_refreshStateLast;
