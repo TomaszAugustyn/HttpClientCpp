@@ -93,16 +93,7 @@ TEST_F(HttpClientTest, queryAPIGetDevices_Throw){
     httpClientPtr = std::make_unique<HttpClient>("amazon.com", "5566", "franeklowcabramek", "asdzxc");
     httpClientPtr->setRunningUnitTest(true);
     httpClientPtr->setTimeout(5L);   
-    EXPECT_THROW({
-        try{
-            httpClientPtr->queryAPI(TemperatureSensor::DEVICE_TYPE_TEMP_SENSOR, HttpClient::GET_DEVICES);
-        }
-        catch( const std::invalid_argument &e ){
-            // and this tests that it has the correct message (no suitable macro in gtest)
-            EXPECT_STREQ( "\nlibcurl: (28) Connection timed out after 5000 milliseconds\n", e.what() );
-            throw;
-        }
-    }, std::runtime_error);
+    EXPECT_THROW( httpClientPtr->queryAPI(TemperatureSensor::DEVICE_TYPE_TEMP_SENSOR, HttpClient::GET_DEVICES), std::runtime_error);
 }
 
 TEST_F(HttpClientTest, queryAPIRefreshStates_noThrow){
@@ -121,16 +112,7 @@ TEST_F(HttpClientTest, queryAPIRefreshStates_Throw){
     httpClientPtr = std::make_unique<HttpClient>("spacex.com", "2000", "elonmusk", "morestarshipsplease111");
     httpClientPtr->setRunningUnitTest(true);
     httpClientPtr->setTimeout(5L);
-    EXPECT_THROW({
-        try{
-            httpClientPtr->queryAPI(TemperatureSensor::DEVICE_TYPE_TEMP_SENSOR, HttpClient::REFRESH_STATE);
-        }
-        catch( const std::invalid_argument &e ){
-            // and this tests that it has the correct message (no suitable macro in gtest)
-            EXPECT_STREQ( "\nlibcurl: (28) Connection timed out after 5000 milliseconds\n", e.what() );
-            throw;
-        }
-    }, std::runtime_error);
+    EXPECT_THROW(httpClientPtr->queryAPI(TemperatureSensor::DEVICE_TYPE_TEMP_SENSOR, HttpClient::REFRESH_STATE), std::runtime_error);
 }
 
 TEST_F(HttpClientTest, addDevices_noThrow){
@@ -191,6 +173,33 @@ TEST_F(HttpClientTest, addDevices_ThrowEmptyBuffer){
         catch( const std::runtime_error &e ){
             // and this tests that it has the correct message (no suitable macro in gtest)
             EXPECT_STREQ( "Buffer m_buffer4GetDevices is empty! Probably got empty response from curl.", e.what() );
+            throw;
+        }
+    }, std::runtime_error);
+    
+    std::vector<boost::shared_ptr<Device> > devices = httpClientPtr->getGetvices();
+    ASSERT_EQ(devices.size(), 0);
+    
+}
+
+TEST_F(HttpClientTest, addDevices_ThrowBrokenJson){
+    
+    httpClientPtr = std::make_unique<HttpClient>("whatever.com", "2000", "user", "password");
+    httpClientPtr->setRunningUnitTest(true);
+    
+    std::ifstream ifs("mocked_jsons/api-devices-broken.json"); //load mocked .json
+    std::string content( (std::istreambuf_iterator<char>(ifs)), 
+                         (std::istreambuf_iterator<char>()) ); 
+    
+    setBuffer4GetDevices(content);
+    EXPECT_THROW({
+        try{
+            addDevices(TemperatureSensor::DEVICE_TYPE_TEMP_SENSOR);
+        }
+        catch( const std::runtime_error &e ){
+            // and this tests that it has the correct message (no suitable macro in gtest)
+            const std::string errMsg = "Failed to parse JSON! Dumping string: " + content;
+            ASSERT_EQ(errMsg, e.what());
             throw;
         }
     }, std::runtime_error);
@@ -280,6 +289,38 @@ TEST_F(HttpClientTest, handleRefreshState_ThrowEmptyBuffer){
         catch( const std::runtime_error &e ){
             // and this tests that it has the correct message (no suitable macro in gtest)
             EXPECT_STREQ( "Buffer m_buffer4RefreshStates is empty! Probably got empty response from curl.", e.what() );
+            throw;
+        }
+    }, std::runtime_error);
+    
+    std::vector<boost::shared_ptr<Device> > devices = httpClientPtr->getGetvices();
+    ASSERT_EQ(devices.size(), 4);
+    
+}
+
+TEST_F(HttpClientTest, handleRefreshState_ThrowBrokenJson){
+    
+    httpClientPtr = std::make_unique<HttpClient>("whatever.com", "2000", "user", "password");
+    httpClientPtr->setRunningUnitTest(true);
+    
+    pushBackToDevices("7", "temperatureSensor_2", "23.17");
+    pushBackToDevices("23", "temperatureSensor_18", "0.00");
+    pushBackToDevices("24", "temperatureSensor_19", "26.29");
+    pushBackToDevices("25", "temperatureSensor_20", "24.48");
+    
+    std::ifstream ifs("mocked_jsons/refreshState-broken.json"); //load mocked .json
+    std::string content( (std::istreambuf_iterator<char>(ifs)), 
+                         (std::istreambuf_iterator<char>()) ); 
+    
+    setBuffer4RefreshStates(content);
+    EXPECT_THROW({
+        try{
+            handleRefreshState(TemperatureSensor::DEVICE_TYPE_TEMP_SENSOR);
+        }
+        catch( const std::runtime_error &e ){
+            // and this tests that it has the correct message (no suitable macro in gtest)
+            const std::string errMsg = "Failed to parse JSON! Dumping string: " + content;
+            ASSERT_EQ(errMsg, e.what());
             throw;
         }
     }, std::runtime_error);
