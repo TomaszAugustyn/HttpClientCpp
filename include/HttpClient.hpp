@@ -30,6 +30,7 @@ class HttpClient
         
         void queryAPI(const std::string &deviceType, CallType callType);
         void printDevices() const;
+        std::vector<boost::shared_ptr<Device> > getGetvices();
         void setTimeout(unsigned long timeout);
         void setRunningUnitTest(bool runningUnitTest);
         

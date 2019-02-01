@@ -1,0 +1,83 @@
+{
+  "alarmChanges": [], 
+  "changes": [
+    {
+      "id": 6, 
+      "value": "69"
+    },
+	{
+      "id": 7, 
+      "value": "19.68"
+    },
+    {
+      "id": 12, 
+      "value": "true"
+    },
+	{
+      "id": 25, 
+      "value": "19.68"
+    }
+  ], 
+  "date": "13:05 | 1.2.2019", 
+  "events": [
+    {
+      "data": {
+        "id": 12, 
+        "newValue": true, 
+        "oldValue": false, 
+        "property": "value"
+      }, 
+      "type": "DevicePropertyUpdatedEvent"
+    }, 
+    {
+      "data": {
+        "id": 5, 
+        "runningInstances": 1, 
+        "runningManualInstances": 0, 
+        "type": ""
+      }, 
+      "type": "SceneRunningInstancesEvent"
+    }, 
+    {
+      "data": {
+        "id": 4, 
+        "runningInstances": 1, 
+        "runningManualInstances": 0, 
+        "type": ""
+      }, 
+      "type": "SceneRunningInstancesEvent"
+    }, 
+    {
+      "data": {
+        "id": 6, 
+        "newValue": 69, 
+        "oldValue": 0, 
+        "property": "value"
+      }, 
+      "type": "DevicePropertyUpdatedEvent"
+    },
+	{
+      "data": {
+        "id": 25, 
+        "newValue": 19.68, 
+        "oldValue": 24.48, 
+        "property": "value"
+      }, 
+      "type": "DevicePropertyUpdatedEvent"
+    },
+	{
+      "data": {
+        "id": 7, 
+        "newValue": 19.68, 
+        "oldValue": 23.17, 
+        "property": "value"
+      }, 
+      "type": "DevicePropertyUpdatedEvent"
+    }
+  ], 
+  "last": 28710, 
+  "logs": [], 
+  "status": "IDLE", 
+  "timestamp": 1549022704
+}
+

@@ -23,6 +23,10 @@ HttpClient::HttpClient(const std::string &hostName, const std::string &port,
 
 }
 
+std::vector<boost::shared_ptr<Device> > HttpClient::getGetvices() {
+    return m_devices;
+}
+
 void HttpClient::printDevices() const{
     
     if (!m_runningUnitTest){
@@ -46,6 +50,7 @@ void HttpClient::setTimeout(unsigned long timeout){
 }
 
 void HttpClient::setRunningUnitTest(bool runningUnitTest){
+    // necessary as gtest doesn't provide any flag/macro to differentiate if actual program is being run or unit tests
     m_runningUnitTest = runningUnitTest;
 }
 
