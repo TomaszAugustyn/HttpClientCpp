@@ -114,8 +114,8 @@ void HttpClient::queryAPI(const std::string &deviceType, CallType callType){
         curl_easy_setopt(curl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
         curl_easy_setopt(curl, CURLOPT_USERPWD, userPwd.c_str());
         curl_easy_setopt(curl, CURLOPT_WRITEDATA, this);
-        curl_easy_setopt(curl, CURLOPT_TIMEOUT, m_timeout); //timeout in seconds
-        //curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L); //uncomment to enable verbosity
+        curl_easy_setopt(curl, CURLOPT_TIMEOUT, m_timeout); // timeout in seconds
+        //curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L); // uncomment to enable verbosity
         if(callType == GET_DEVICES){
             curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, this->writerCallback4DevicesQuery);
         }
