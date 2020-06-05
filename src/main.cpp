@@ -48,7 +48,7 @@ char getch() {
     return (buf);
 }
 
-void keyPress(boost::shared_ptr<HttpClient> ptr){
+void keyPress(std::shared_ptr<HttpClient> ptr){
     //char key = ' '; 
     while(true){
         if(_kbhit()){
@@ -62,8 +62,8 @@ void keyPress(boost::shared_ptr<HttpClient> ptr){
 int main()
 {
     std::string ip = "", port = "", username = "", password = "";
-    boost::shared_ptr<std::map<std::string, std::string> > paramMap(new std::map<std::string, std::string>());
-    boost::shared_ptr<HttpClient> httpClientPtr;
+    std::shared_ptr<std::map<std::string, std::string> > paramMap(new std::map<std::string, std::string>());
+    std::shared_ptr<HttpClient> httpClientPtr;
     UserInputValidator validator;
       
     while(true) {

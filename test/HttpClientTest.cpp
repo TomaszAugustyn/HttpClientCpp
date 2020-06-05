@@ -2,7 +2,6 @@
 #include "gtest/gtest.h"
 #include "HttpClient.hpp"
 #include "TemperatureSensor.hpp"
-#include "boost/shared_ptr.hpp"
 #include <memory>
 #include <fstream>
 
@@ -39,7 +38,7 @@ class HttpClientTest : public ::testing::Test {
         
         void pushBackToDevices(const std::string &id, const std::string &name, const std::string &value){
             if(httpClientPtr.get() != NULL){
-                boost::shared_ptr<TemperatureSensor> dev( new TemperatureSensor(id, name, value) );
+                std::shared_ptr<TemperatureSensor> dev( new TemperatureSensor(id, name, value) );
                 httpClientPtr->m_devices.push_back(dev); 
             }
             else{
@@ -127,11 +126,11 @@ TEST_F(HttpClientTest, addDevices_noThrow){
     setBuffer4GetDevices(content);
     ASSERT_NO_THROW(addDevices(TemperatureSensor::DEVICE_TYPE_TEMP_SENSOR));
     
-    std::vector<boost::shared_ptr<Device> > devices = httpClientPtr->getGetvices();
+    std::vector<std::shared_ptr<Device> > devices = httpClientPtr->getGetvices();
     ASSERT_EQ(devices.size(), 4);
     
     for (auto &device : devices){
-        boost::shared_ptr<TemperatureSensor> temp = boost::dynamic_pointer_cast<TemperatureSensor>(device);
+        std::shared_ptr<TemperatureSensor> temp = std::dynamic_pointer_cast<TemperatureSensor>(device);
         ASSERT_TRUE(temp);
         std::string id = temp->getID();
         std::string name = temp->getName();
@@ -177,7 +176,7 @@ TEST_F(HttpClientTest, addDevices_ThrowEmptyBuffer){
         }
     }, std::runtime_error);
     
-    std::vector<boost::shared_ptr<Device> > devices = httpClientPtr->getGetvices();
+    std::vector<std::shared_ptr<Device> > devices = httpClientPtr->getGetvices();
     ASSERT_EQ(devices.size(), 0);
     
 }
@@ -204,14 +203,14 @@ TEST_F(HttpClientTest, addDevices_ThrowBrokenJson){
         }
     }, std::runtime_error);
     
-    std::vector<boost::shared_ptr<Device> > devices = httpClientPtr->getGetvices();
+    std::vector<std::shared_ptr<Device> > devices = httpClientPtr->getGetvices();
     ASSERT_EQ(devices.size(), 0);
     
 }
 
 TEST_F(HttpClientTest, handleRefreshState_noThrow){
     
-    std::vector<boost::shared_ptr<Device> > devices;
+    std::vector<std::shared_ptr<Device> > devices;
     httpClientPtr = std::make_unique<HttpClient>("whatever.com", "2000", "user", "password");
     httpClientPtr->setRunningUnitTest(true);
     
@@ -241,7 +240,7 @@ TEST_F(HttpClientTest, handleRefreshState_noThrow){
     ASSERT_EQ(getRefreshStateLast(), "28710");
     
     for (auto &device : devices){
-        boost::shared_ptr<TemperatureSensor> temp = boost::dynamic_pointer_cast<TemperatureSensor>(device);
+        std::shared_ptr<TemperatureSensor> temp = std::dynamic_pointer_cast<TemperatureSensor>(device);
         ASSERT_TRUE(temp);
         std::string id = temp->getID();
         std::string name = temp->getName();
@@ -293,7 +292,7 @@ TEST_F(HttpClientTest, handleRefreshState_ThrowEmptyBuffer){
         }
     }, std::runtime_error);
     
-    std::vector<boost::shared_ptr<Device> > devices = httpClientPtr->getGetvices();
+    std::vector<std::shared_ptr<Device> > devices = httpClientPtr->getGetvices();
     ASSERT_EQ(devices.size(), 4);
     
 }
@@ -325,7 +324,7 @@ TEST_F(HttpClientTest, handleRefreshState_ThrowBrokenJson){
         }
     }, std::runtime_error);
     
-    std::vector<boost::shared_ptr<Device> > devices = httpClientPtr->getGetvices();
+    std::vector<std::shared_ptr<Device> > devices = httpClientPtr->getGetvices();
     ASSERT_EQ(devices.size(), 4);
     
 }

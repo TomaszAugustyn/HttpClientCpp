@@ -9,9 +9,9 @@
 #define IVALIDATOR_HPP
 
 #include <map>
-#include "boost/shared_ptr.hpp"
+#include <memory>
 
-using ParameterMapPtr = boost::shared_ptr<std::map<std::string, std::string> >;
+using ParameterMapPtr = std::shared_ptr<std::map<std::string, std::string> >;
 
 class IValidator{
     

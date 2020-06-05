@@ -15,19 +15,19 @@ void UserInputValidator::validate(ParameterMapPtr paramMap){
     validatePassword(paramMap);
 }
 
-std::string UserInputValidator::getPort() const{
+std::string UserInputValidator::getPort() const {
     return m_port;
 }
 
-std::string UserInputValidator::getHostName() const{
+std::string UserInputValidator::getHostName() const {
     return m_hostName;
 }
 
-std::string UserInputValidator::getUsername() const{
+std::string UserInputValidator::getUsername() const {
     return m_username;
 }
 
-std::string UserInputValidator::getPassword() const{
+std::string UserInputValidator::getPassword() const {
     return m_password;
 }
 

@@ -10,7 +10,7 @@
 
 #include "IValidator.hpp"
 #include "gtest/gtest_prod.h"
-
+#include <string>
 
 class UserInputValidator : public IValidator {  
     

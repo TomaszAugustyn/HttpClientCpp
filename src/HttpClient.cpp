@@ -23,7 +23,7 @@ HttpClient::HttpClient(const std::string &hostName, const std::string &port,
 
 }
 
-std::vector<boost::shared_ptr<Device> > HttpClient::getGetvices() {
+std::vector<std::shared_ptr<Device> > HttpClient::getGetvices() {
     return m_devices;
 }
 
@@ -35,7 +35,7 @@ void HttpClient::printDevices() const{
     std::cout << std::endl;
     for (auto &device : m_devices){
         std::cout << "deviceID: " << device->getID() << " deviceName: " << device->getName();
-        if(boost::shared_ptr<TemperatureSensor> temp = boost::dynamic_pointer_cast<TemperatureSensor>(device)) {
+        if(std::shared_ptr<TemperatureSensor> temp = std::dynamic_pointer_cast<TemperatureSensor>(device)) {
             std::cout << " current value: " << temp->getValue() << std::endl;
         }
         else{
@@ -196,14 +196,14 @@ void HttpClient::addTemperatureSensors(const Json::Value &root){
             for (auto &device : m_devices){
                 if((device->getID() == deviceID) && (device->getName() == deviceName)){
                     createNewTempSensor = false;
-                    if(boost::shared_ptr<TemperatureSensor> temp = boost::dynamic_pointer_cast<TemperatureSensor>(device)) {
+                    if(std::shared_ptr<TemperatureSensor> temp = std::dynamic_pointer_cast<TemperatureSensor>(device)) {
                         temp->setValue(currentValue); //update temperature value
                     }
                     break;
                 }
             }
             if(createNewTempSensor){
-                boost::shared_ptr<TemperatureSensor> dev( new TemperatureSensor(deviceID, deviceName, currentValue) );
+                std::shared_ptr<TemperatureSensor> dev( new TemperatureSensor(deviceID, deviceName, currentValue) );
                 m_devices.push_back(dev);    
             }
         }              
@@ -243,7 +243,7 @@ void HttpClient::refreshTemperatureSensors(const Json::Value &root){
         std::string deviceID = (*iter)["id"].asString();
         for (auto &device : m_devices){
             if(device->getID() == deviceID){
-                if(boost::shared_ptr<TemperatureSensor> temp = boost::dynamic_pointer_cast<TemperatureSensor>(device)) {
+                if(std::shared_ptr<TemperatureSensor> temp = std::dynamic_pointer_cast<TemperatureSensor>(device)) {
                     std::string newValue = (*iter)["value"].asString();
                     temp->setValue(newValue); //set new value
                     valueChanged = true;

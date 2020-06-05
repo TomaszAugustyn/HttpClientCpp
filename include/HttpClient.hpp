@@ -10,9 +10,9 @@
 
 #include <string>
 #include <vector>
-#include <cstddef> 
+#include <cstddef>
+#include <memory>
 #include "Device.hpp"
-#include "boost/shared_ptr.hpp"
 #include "jsoncpp/json/json.h"
 #include "curl/curl.h"
 
@@ -30,7 +30,7 @@ class HttpClient
         
         void queryAPI(const std::string &deviceType, CallType callType);
         void printDevices() const;
-        std::vector<boost::shared_ptr<Device> > getGetvices();
+        std::vector<std::shared_ptr<Device> > getGetvices();
         void setTimeout(unsigned long timeout);
         void setRunningUnitTest(bool runningUnitTest);
         
@@ -41,7 +41,7 @@ class HttpClient
         const std::string m_password;
         unsigned long m_timeout;
         bool m_runningUnitTest;
-        std::vector<boost::shared_ptr<Device> > m_devices;
+        std::vector<std::shared_ptr<Device> > m_devices;
       
         std::string m_refreshStateLast;
         
