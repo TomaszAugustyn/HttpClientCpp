@@ -10,6 +10,7 @@ build/
 
 # IDE-specific project dir/files
 nbproject
+.vscode
 
 # Generated test files
 test/testAll.xml
