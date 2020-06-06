@@ -1,18 +1,16 @@
-#include <stdio.h>
+#include "HttpClient.hpp"
+#include "TemperatureSensor.hpp"
+#include "UserInputValidator.hpp"
+#include <future>
 #include <iostream>
 #include <stdexcept>
-#include <unistd.h>
-#include <termios.h>
-#include <sys/ioctl.h>
-#include <thread>
-#include <future>
 #include <stdio.h>
-#include "HttpClient.hpp"
-#include "UserInputValidator.hpp"
-#include "TemperatureSensor.hpp"
+#include <sys/ioctl.h>
+#include <termios.h>
+#include <thread>
+#include <unistd.h>
 
-bool _kbhit()
-{
+bool _kbhit() {
     termios term;
     tcgetattr(0, &term);
 
@@ -30,44 +28,44 @@ bool _kbhit()
 
 char getch() {
     char buf = 0;
-    struct termios old = {0};
+    struct termios old = { 0 };
     if (tcgetattr(0, &old) < 0)
-            perror("tcsetattr()");
+        perror("tcsetattr()");
     old.c_lflag &= ~ICANON;
     old.c_lflag &= ~ECHO;
     old.c_cc[VMIN] = 1;
     old.c_cc[VTIME] = 0;
     if (tcsetattr(0, TCSANOW, &old) < 0)
-            perror("tcsetattr ICANON");
+        perror("tcsetattr ICANON");
     if (read(0, &buf, 1) < 0)
-            perror ("read()");
+        perror("read()");
     old.c_lflag |= ICANON;
     old.c_lflag |= ECHO;
     if (tcsetattr(0, TCSADRAIN, &old) < 0)
-            perror ("tcsetattr ~ICANON");
+        perror("tcsetattr ~ICANON");
     return (buf);
 }
 
-void keyPress(std::shared_ptr<HttpClient> ptr){
-    //char key = ' '; 
-    while(true){
-        if(_kbhit()){
-            std::cout << "Key pressed, refreshing..." <<std::endl;
+void keyPress(std::shared_ptr<HttpClient> ptr) {
+    // char key = ' ';
+    while (true) {
+        if (_kbhit()) {
+            std::cout << "Key pressed, refreshing..." << std::endl;
             tcflush(0, TCIFLUSH);
             ptr->queryAPI(TemperatureSensor::DEVICE_TYPE_TEMP_SENSOR, HttpClient::GET_DEVICES);
         }
     }
 }
 
-int main()
-{
+int main() {
     std::string ip = "", port = "", username = "", password = "";
-    std::shared_ptr<std::map<std::string, std::string> > paramMap(new std::map<std::string, std::string>());
+    std::shared_ptr<std::map<std::string, std::string>> paramMap(
+            new std::map<std::string, std::string>());
     std::shared_ptr<HttpClient> httpClientPtr;
     UserInputValidator validator;
-      
-    while(true) {
-        try{
+
+    while (true) {
+        try {
             std::cout << "Enter IP address/hostname of the central: ";
             getline(std::cin, (*paramMap)["hostname"], '\n');
             std::cout << "Enter port number [0-65535]: ";
@@ -79,33 +77,33 @@ int main()
 
             validator.validate(paramMap);
             break;
-        }
-        catch(const std::invalid_argument &e){
+        } catch (const std::invalid_argument& e) {
             std::cout << "An Exception occured: " << e.what() << std::endl;
             std::cout << "Please try entering parameters again." << std::endl;
         }
     }
-    
-    httpClientPtr.reset(new HttpClient(validator.getHostName(), 
-                                               validator.getPort(),
-                                               validator.getUsername(),
-                                               validator.getPassword()));
-    
-    //httpClientPtr.reset(new HttpClient("styx.fibaro.com", "9999", "admin", "admin")); // for testing
 
-    try{
-        httpClientPtr->queryAPI(TemperatureSensor::DEVICE_TYPE_TEMP_SENSOR, HttpClient::GET_DEVICES);    
+    httpClientPtr.reset(new HttpClient(
+            validator.getHostName(),
+            validator.getPort(),
+            validator.getUsername(),
+            validator.getPassword()));
+
+    // For testing
+    // httpClientPtr.reset(new HttpClient("styx.fibaro.com", "9999", "admin", "admin"));
+
+    try {
+        httpClientPtr->queryAPI(
+                TemperatureSensor::DEVICE_TYPE_TEMP_SENSOR, HttpClient::GET_DEVICES);
         auto f = std::async(std::launch::async, keyPress, httpClientPtr);
-        while (true){
-            httpClientPtr->queryAPI(TemperatureSensor::DEVICE_TYPE_TEMP_SENSOR, HttpClient::REFRESH_STATE);
-        } 
-    }
-    catch(const std::runtime_error &e){
+        while (true) {
+            httpClientPtr->queryAPI(
+                    TemperatureSensor::DEVICE_TYPE_TEMP_SENSOR, HttpClient::REFRESH_STATE);
+        }
+    } catch (const std::runtime_error& e) {
         std::cout << "An Exception occured: " << e.what() << std::endl;
         return 1;
     }
-  
 
     return 0;
 }
-

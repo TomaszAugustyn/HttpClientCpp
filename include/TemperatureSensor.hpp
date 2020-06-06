@@ -1,4 +1,4 @@
-/* 
+/*
  * File:   TemperatureSensor.hpp
  * Author: ubuntu
  *
@@ -11,17 +11,16 @@
 #include "Device.hpp"
 
 class TemperatureSensor : public Device {
-    
-    public:
-        TemperatureSensor();
-        TemperatureSensor(const std::string &id, const std::string &name, const std::string &value);
-        static const std::string DEVICE_TYPE_TEMP_SENSOR;
-        void setValue(const std::string &value);
-        std::string getValue() const; 
-        
-    private:
-        std::string m_value;
+
+public:
+    TemperatureSensor();
+    TemperatureSensor(const std::string& id, const std::string& name, const std::string& value);
+    static const std::string DEVICE_TYPE_TEMP_SENSOR;
+    void setValue(const std::string& value);
+    std::string getValue() const;
+
+private:
+    std::string m_value;
 };
 
 #endif /* TEMPERATURESENSOR_HPP */
-

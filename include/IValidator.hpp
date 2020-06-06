@@ -1,4 +1,4 @@
-/* 
+/*
  * File:   IValidator.hpp
  * Author: ubuntu
  *
@@ -11,17 +11,13 @@
 #include <map>
 #include <memory>
 
-using ParameterMapPtr = std::shared_ptr<std::map<std::string, std::string> >;
+using ParameterMapPtr = std::shared_ptr<std::map<std::string, std::string>>;
 
-class IValidator{
-    
-    public:
-        virtual void validate(ParameterMapPtr paramMap) = 0;
-        virtual ~IValidator() = default;
-        
+class IValidator {
+
+public:
+    virtual void validate(ParameterMapPtr paramMap) = 0;
+    virtual ~IValidator() = default;
 };
 
-
-
 #endif /* IVALIDATOR_HPP */
-

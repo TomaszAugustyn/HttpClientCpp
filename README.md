@@ -57,9 +57,3 @@ Http client in C++ for monitoring devices in Home Center
   * To run tests: <br />
     $ cd test/ <br />
 	$ make runTests
-	
-
- 
- 
- 
- 
