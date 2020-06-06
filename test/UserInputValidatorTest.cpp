@@ -29,8 +29,7 @@ private:
 
 TEST_F(UserInputValidatorTest, validate) {
 
-    std::shared_ptr<std::map<std::string, std::string>> paramMap(
-            new std::map<std::string, std::string>());
+    auto paramMap = std::make_shared<std::map<std::string, std::string>>();
     (*paramMap)["hostname"] = "styx.fibaro.com";
     (*paramMap)["port"] = "9999";
     (*paramMap)["username"] = "admin";
@@ -95,8 +94,7 @@ TEST_F(UserInputValidatorTest, validatePortNegative) {
 
 TEST_F(UserInputValidatorTest, validateHostnameAndPortPositive) {
 
-    std::shared_ptr<std::map<std::string, std::string>> paramMap(
-            new std::map<std::string, std::string>());
+    auto paramMap = std::make_shared<std::map<std::string, std::string>>();
 
     (*paramMap)["hostname"] = "google.com";
     (*paramMap)["port"] = "2000";
@@ -111,9 +109,9 @@ TEST_F(UserInputValidatorTest, validateHostnameAndPortPositive) {
 
 TEST_F(UserInputValidatorTest, validateHostnameAndPortNegative) {
 
-    std::shared_ptr<std::map<std::string, std::string>> paramMap(
-            new std::map<std::string, std::string>());
+    auto paramMap = std::make_shared<std::map<std::string, std::string>>();
     (*paramMap)["hostname"] = "wp.pl";
+
     EXPECT_THROW(
             {
                 try {
@@ -161,8 +159,7 @@ TEST_F(UserInputValidatorTest, validateHostnameAndPortNegative) {
 
 TEST_F(UserInputValidatorTest, validateUsernamePositive) {
 
-    std::shared_ptr<std::map<std::string, std::string>> paramMap(
-            new std::map<std::string, std::string>());
+    auto paramMap = std::make_shared<std::map<std::string, std::string>>();
 
     (*paramMap)["username"] = "Elliot Alderson";
     ASSERT_NO_THROW(validateUsername(paramMap));
@@ -174,8 +171,7 @@ TEST_F(UserInputValidatorTest, validateUsernamePositive) {
 
 TEST_F(UserInputValidatorTest, validateUsernameNegative) {
 
-    std::shared_ptr<std::map<std::string, std::string>> paramMap(
-            new std::map<std::string, std::string>());
+    auto paramMap = std::make_shared<std::map<std::string, std::string>>();
 
     EXPECT_THROW(
             {
@@ -206,8 +202,7 @@ TEST_F(UserInputValidatorTest, validateUsernameNegative) {
 
 TEST_F(UserInputValidatorTest, validatePasswordPositive) {
 
-    std::shared_ptr<std::map<std::string, std::string>> paramMap(
-            new std::map<std::string, std::string>());
+    auto paramMap = std::make_shared<std::map<std::string, std::string>>();
 
     (*paramMap)["password"] = "sweetKittens888";
     ASSERT_NO_THROW(validatePassword(paramMap));
@@ -219,8 +214,7 @@ TEST_F(UserInputValidatorTest, validatePasswordPositive) {
 
 TEST_F(UserInputValidatorTest, validatePasswordNegative) {
 
-    std::shared_ptr<std::map<std::string, std::string>> paramMap(
-            new std::map<std::string, std::string>());
+    auto paramMap = std::make_shared<std::map<std::string, std::string>>();
 
     EXPECT_THROW(
             {

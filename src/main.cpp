@@ -59,9 +59,7 @@ void keyPress(std::shared_ptr<HttpClient> ptr) {
 
 int main() {
     std::string ip = "", port = "", username = "", password = "";
-    std::shared_ptr<std::map<std::string, std::string>> paramMap(
-            new std::map<std::string, std::string>());
-    std::shared_ptr<HttpClient> httpClientPtr;
+    auto paramMap = std::make_shared<std::map<std::string, std::string>>();
     UserInputValidator validator;
 
     while (true) {
@@ -83,11 +81,11 @@ int main() {
         }
     }
 
-    httpClientPtr.reset(new HttpClient(
+    auto httpClientPtr = std::make_shared<HttpClient>(
             validator.getHostName(),
             validator.getPort(),
             validator.getUsername(),
-            validator.getPassword()));
+            validator.getPassword());
 
     // For testing
     // httpClientPtr.reset(new HttpClient("styx.fibaro.com", "9999", "admin", "admin"));

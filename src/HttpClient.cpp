@@ -37,8 +37,7 @@ void HttpClient::printDevices() const {
     std::cout << std::endl;
     for (auto& device : m_devices) {
         std::cout << "deviceID: " << device->getID() << " deviceName: " << device->getName();
-        if (std::shared_ptr<TemperatureSensor> temp =
-                    std::dynamic_pointer_cast<TemperatureSensor>(device)) {
+        if (auto temp = std::dynamic_pointer_cast<TemperatureSensor>(device)) {
             std::cout << " current value: " << temp->getValue() << std::endl;
         } else {
             std::cout << std::endl;
@@ -185,20 +184,18 @@ void HttpClient::addTemperatureSensors(const Json::Value& root) {
             std::string currentValue = (*iter)["properties"]["value"].asString();
             bool createNewTempSensor = true;
             // check if they are already in m_devices vector
-            for (auto& device : m_devices) {
+            for (const auto& device : m_devices) {
                 if ((device->getID() == deviceID) && (device->getName() == deviceName)) {
                     createNewTempSensor = false;
-                    if (std::shared_ptr<TemperatureSensor> temp =
-                                std::dynamic_pointer_cast<TemperatureSensor>(device)) {
+                    if (auto temp = std::dynamic_pointer_cast<TemperatureSensor>(device)) {
                         temp->setValue(currentValue); // update temperature value
                     }
                     break;
                 }
             }
             if (createNewTempSensor) {
-                std::shared_ptr<TemperatureSensor> dev(
-                        new TemperatureSensor(deviceID, deviceName, currentValue));
-                m_devices.push_back(dev);
+                auto dev = std::make_shared<TemperatureSensor>(deviceID, deviceName, currentValue);
+                m_devices.push_back(std::move(dev));
             }
         }
     }
@@ -237,8 +234,7 @@ void HttpClient::refreshTemperatureSensors(const Json::Value& root) {
         std::string deviceID = (*iter)["id"].asString();
         for (auto& device : m_devices) {
             if (device->getID() == deviceID) {
-                if (std::shared_ptr<TemperatureSensor> temp =
-                            std::dynamic_pointer_cast<TemperatureSensor>(device)) {
+                if (auto temp = std::dynamic_pointer_cast<TemperatureSensor>(device)) {
                     std::string newValue = (*iter)["value"].asString();
                     temp->setValue(newValue); // set new value
                     valueChanged = true;

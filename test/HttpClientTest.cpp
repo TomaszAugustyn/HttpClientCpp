@@ -35,8 +35,8 @@ protected:
     void
     pushBackToDevices(const std::string& id, const std::string& name, const std::string& value) {
         if (httpClientPtr.get() != NULL) {
-            std::shared_ptr<TemperatureSensor> dev(new TemperatureSensor(id, name, value));
-            httpClientPtr->m_devices.push_back(dev);
+            auto dev = std::make_shared<TemperatureSensor>(id, name, value);
+            httpClientPtr->m_devices.push_back(std::move(dev));
         } else {
             FAIL() << "httpClientPtr null pointer exception! Cannot proceed.";
         }
@@ -127,12 +127,11 @@ TEST_F(HttpClientTest, addDevices_noThrow) {
     setBuffer4GetDevices(content);
     ASSERT_NO_THROW(addDevices(TemperatureSensor::DEVICE_TYPE_TEMP_SENSOR));
 
-    std::vector<std::shared_ptr<Device>> devices = httpClientPtr->getGetvices();
+    auto devices = httpClientPtr->getGetvices();
     ASSERT_EQ(devices.size(), 4);
 
-    for (auto& device : devices) {
-        std::shared_ptr<TemperatureSensor> temp =
-                std::dynamic_pointer_cast<TemperatureSensor>(device);
+    for (const auto& device : devices) {
+        auto temp = std::dynamic_pointer_cast<TemperatureSensor>(device);
         ASSERT_TRUE(temp);
         std::string id = temp->getID();
         std::string name = temp->getName();
@@ -177,7 +176,7 @@ TEST_F(HttpClientTest, addDevices_ThrowEmptyBuffer) {
             },
             std::runtime_error);
 
-    std::vector<std::shared_ptr<Device>> devices = httpClientPtr->getGetvices();
+    auto devices = httpClientPtr->getGetvices();
     ASSERT_EQ(devices.size(), 0);
 }
 
@@ -203,13 +202,12 @@ TEST_F(HttpClientTest, addDevices_ThrowBrokenJson) {
             },
             std::runtime_error);
 
-    std::vector<std::shared_ptr<Device>> devices = httpClientPtr->getGetvices();
+    auto devices = httpClientPtr->getGetvices();
     ASSERT_EQ(devices.size(), 0);
 }
 
 TEST_F(HttpClientTest, handleRefreshState_noThrow) {
 
-    std::vector<std::shared_ptr<Device>> devices;
     httpClientPtr = std::make_unique<HttpClient>("whatever.com", "2000", "user", "password");
     httpClientPtr->setRunningUnitTest(true);
 
@@ -223,7 +221,7 @@ TEST_F(HttpClientTest, handleRefreshState_noThrow) {
 
     setBuffer4RefreshStates(content);
     ASSERT_NO_THROW(handleRefreshState(TemperatureSensor::DEVICE_TYPE_TEMP_SENSOR));
-    devices = httpClientPtr->getGetvices();
+    auto devices = httpClientPtr->getGetvices();
     ASSERT_EQ(devices.size(), 4);
     ASSERT_EQ(getRefreshStateLast(), "28702");
 
@@ -236,9 +234,8 @@ TEST_F(HttpClientTest, handleRefreshState_noThrow) {
     ASSERT_EQ(devices.size(), 4);
     ASSERT_EQ(getRefreshStateLast(), "28710");
 
-    for (auto& device : devices) {
-        std::shared_ptr<TemperatureSensor> temp =
-                std::dynamic_pointer_cast<TemperatureSensor>(device);
+    for (const auto& device : devices) {
+        auto temp = std::dynamic_pointer_cast<TemperatureSensor>(device);
         ASSERT_TRUE(temp);
         std::string id = temp->getID();
         std::string name = temp->getName();
@@ -289,7 +286,7 @@ TEST_F(HttpClientTest, handleRefreshState_ThrowEmptyBuffer) {
             },
             std::runtime_error);
 
-    std::vector<std::shared_ptr<Device>> devices = httpClientPtr->getGetvices();
+    auto devices = httpClientPtr->getGetvices();
     ASSERT_EQ(devices.size(), 4);
 }
 
@@ -320,6 +317,6 @@ TEST_F(HttpClientTest, handleRefreshState_ThrowBrokenJson) {
             },
             std::runtime_error);
 
-    std::vector<std::shared_ptr<Device>> devices = httpClientPtr->getGetvices();
+    auto devices = httpClientPtr->getGetvices();
     ASSERT_EQ(devices.size(), 4);
 }
