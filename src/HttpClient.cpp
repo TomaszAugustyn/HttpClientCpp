@@ -18,10 +18,7 @@ HttpClient::HttpClient(
       m_timeout(0L),
       m_runningUnitTest(false),
       m_refreshStateLast(""),
-      m_buffer4GetDevices(""),
-      m_buffer4RefreshStates("")
-
-{
+      m_buffer("") {
 }
 
 std::vector<std::shared_ptr<Device>> HttpClient::getGetvices() {
@@ -56,26 +53,17 @@ void HttpClient::setRunningUnitTest(bool runningUnitTest) {
     m_runningUnitTest = runningUnitTest;
 }
 
-size_t HttpClient::writerCallback4DevicesQuery(char* data, size_t size, size_t nmemb, void* p) {
-    return static_cast<HttpClient*>(p)->writerCallback4DevicesQuery_impl(data, size, nmemb);
+size_t HttpClient::writerCallback(char* data, size_t size, size_t nmemb, void* p) {
+    return static_cast<HttpClient*>(p)->writerCallback_impl(data, size, nmemb);
 }
 
-size_t HttpClient::writerCallback4DevicesQuery_impl(char* data, size_t size, size_t nmemb) {
-    m_buffer4GetDevices.append(data, size * nmemb);
-    return size * nmemb;
-}
-
-size_t HttpClient::writerCallback4RefreshQuery(char* data, size_t size, size_t nmemb, void* p) {
-    return static_cast<HttpClient*>(p)->writerCallback4RefreshQuery_impl(data, size, nmemb);
-}
-
-size_t HttpClient::writerCallback4RefreshQuery_impl(char* data, size_t size, size_t nmemb) {
-    m_buffer4RefreshStates.append(data, size * nmemb);
+size_t HttpClient::writerCallback_impl(char* data, size_t size, size_t nmemb) {
+    std::scoped_lock<std::mutex> lock(m_mutex);
+    m_buffer.append(data, size * nmemb);
     return size * nmemb;
 }
 
 void HttpClient::queryAPI(const std::string& deviceType, CallType callType) {
-
     CURL* curl;
     CURLcode res;
     char errbuf[CURL_ERROR_SIZE];
@@ -83,6 +71,7 @@ void HttpClient::queryAPI(const std::string& deviceType, CallType callType) {
     std::string jsonStr = "";
     std::string userPwd = std::string(m_username).append(":").append(m_password);
     std::string URL = m_hostName;
+
     if (!m_port.empty()) {
         URL.append(":").append(m_port);
     }
@@ -114,32 +103,27 @@ void HttpClient::queryAPI(const std::string& deviceType, CallType callType) {
         curl_easy_setopt(curl, CURLOPT_WRITEDATA, this);
         curl_easy_setopt(curl, CURLOPT_TIMEOUT, m_timeout); // timeout in seconds
         // curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L); // uncomment to enable verbosity
-        if (callType == GET_DEVICES) {
-            curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, this->writerCallback4DevicesQuery);
-        } else if (callType == REFRESH_STATE) {
-            curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, this->writerCallback4RefreshQuery);
-        }
+        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, this->writerCallback);
+
         errbuf[0] = 0;
         res = curl_easy_perform(curl);
-
-        if (CURLE_OK == res) {
-            if (callType == GET_DEVICES) {
-                addDevices(deviceType);
-            } else if (callType == REFRESH_STATE) {
-                handleRefreshState(deviceType);
+        {
+            std::scoped_lock<std::mutex> lock(m_mutex);
+            if (CURLE_OK == res) {
+                if (callType == GET_DEVICES) {
+                    addDevices(deviceType);
+                } else if (callType == REFRESH_STATE) {
+                    handleRefreshState(deviceType);
+                }
+                m_buffer.clear();
+            } else {
+                handleCurlError(errbuf, res);
             }
-        } else {
-            handleCurlError(errbuf, res);
         }
     }
 
     curl_slist_free_all(headers);
     curl_easy_cleanup(curl);
-    if (callType == GET_DEVICES) {
-        m_buffer4GetDevices.clear();
-    } else if (callType == REFRESH_STATE) {
-        m_buffer4RefreshStates.clear();
-    }
 }
 
 void HttpClient::handleCurlError(char* errbuf, CURLcode& res) {
@@ -153,7 +137,7 @@ void HttpClient::handleCurlError(char* errbuf, CURLcode& res) {
     } else {
         errMsg.append(curl_easy_strerror(res)).append("\n");
     }
-
+    m_buffer.clear();
     throw std::runtime_error(errMsg);
 }
 
@@ -161,14 +145,15 @@ void HttpClient::addDevices(const std::string& deviceType) {
 
     Json::Value root;
     Json::Reader reader;
-    if (m_buffer4GetDevices.empty()) {
-        throw std::runtime_error(
-                "Buffer m_buffer4GetDevices is empty! Probably got empty response from curl.");
+    if (m_buffer.empty()) {
+        throw std::runtime_error("Buffer is empty! Probably got empty response from curl.");
     }
-    bool parsingSuccessful = reader.parse(m_buffer4GetDevices, root);
+    bool parsingSuccessful = reader.parse(m_buffer, root);
     if (!parsingSuccessful) {
+        std::string dump(m_buffer);
+        m_buffer.clear();
         throw std::runtime_error(
-                "Failed to parse JSON! Dumping string: " + std::string(m_buffer4GetDevices));
+                "Failed to parse JSON! Dumping string: " + std::string(std::move(dump)));
     }
     if (deviceType == TemperatureSensor::DEVICE_TYPE_TEMP_SENSOR) {
         addTemperatureSensors(root);
@@ -206,14 +191,15 @@ void HttpClient::handleRefreshState(const std::string& deviceType) {
 
     Json::Value root;
     Json::Reader reader;
-    if (m_buffer4RefreshStates.empty()) {
-        throw std::runtime_error(
-                "Buffer m_buffer4RefreshStates is empty! Probably got empty response from curl.");
+    if (m_buffer.empty()) {
+        throw std::runtime_error("Buffer is empty! Probably got empty response from curl.");
     }
-    bool parsingSuccessful = reader.parse(m_buffer4RefreshStates, root);
+    bool parsingSuccessful = reader.parse(m_buffer, root);
     if (!parsingSuccessful) {
+        std::string dump(m_buffer);
+        m_buffer.clear();
         throw std::runtime_error(
-                "Failed to parse JSON! Dumping string: " + std::string(m_buffer4RefreshStates));
+                "Failed to parse JSON! Dumping string: " + std::string(std::move(dump)));
     }
     if (deviceType == TemperatureSensor::DEVICE_TYPE_TEMP_SENSOR) {
         refreshTemperatureSensors(root);

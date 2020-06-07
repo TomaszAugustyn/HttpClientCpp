@@ -49,17 +49,9 @@ protected:
         return "";
     }
 
-    void setBuffer4GetDevices(const std::string& bufferToSet) {
+    void setBuffer(const std::string& bufferToSet) {
         if (httpClientPtr.get() != NULL) {
-            httpClientPtr->m_buffer4GetDevices = std::string(bufferToSet);
-        } else {
-            FAIL() << "httpClientPtr null pointer exception! Cannot proceed.";
-        }
-    }
-
-    void setBuffer4RefreshStates(const std::string& bufferToSet) {
-        if (httpClientPtr.get() != NULL) {
-            httpClientPtr->m_buffer4RefreshStates = std::string(bufferToSet);
+            httpClientPtr->m_buffer = std::string(bufferToSet);
         } else {
             FAIL() << "httpClientPtr null pointer exception! Cannot proceed.";
         }
@@ -124,7 +116,7 @@ TEST_F(HttpClientTest, addDevices_noThrow) {
     std::ifstream ifs("mocked_jsons/api-devices.json"); // load mocked .json
     std::string content((std::istreambuf_iterator<char>(ifs)), (std::istreambuf_iterator<char>()));
 
-    setBuffer4GetDevices(content);
+    setBuffer(content);
     ASSERT_NO_THROW(addDevices(TemperatureSensor::DEVICE_TYPE_TEMP_SENSOR));
 
     auto devices = httpClientPtr->getGetvices();
@@ -160,7 +152,7 @@ TEST_F(HttpClientTest, addDevices_ThrowEmptyBuffer) {
     httpClientPtr->setRunningUnitTest(true);
 
     std::string content = "";
-    setBuffer4GetDevices(content);
+    setBuffer(content);
     EXPECT_THROW(
             {
                 try {
@@ -168,7 +160,7 @@ TEST_F(HttpClientTest, addDevices_ThrowEmptyBuffer) {
                 } catch (const std::runtime_error& e) {
                     // and this tests that it has the correct message (no suitable macro in gtest)
                     EXPECT_STREQ(
-                            "Buffer m_buffer4GetDevices is empty! Probably got empty response from "
+                            "Buffer is empty! Probably got empty response from "
                             "curl.",
                             e.what());
                     throw;
@@ -188,7 +180,7 @@ TEST_F(HttpClientTest, addDevices_ThrowBrokenJson) {
     std::ifstream ifs("mocked_jsons/api-devices-broken.json"); // load mocked .json
     std::string content((std::istreambuf_iterator<char>(ifs)), (std::istreambuf_iterator<char>()));
 
-    setBuffer4GetDevices(content);
+    setBuffer(content);
     EXPECT_THROW(
             {
                 try {
@@ -219,7 +211,7 @@ TEST_F(HttpClientTest, handleRefreshState_noThrow) {
     std::ifstream ifs("mocked_jsons/refreshState-no-param.json"); // load mocked .json
     std::string content((std::istreambuf_iterator<char>(ifs)), (std::istreambuf_iterator<char>()));
 
-    setBuffer4RefreshStates(content);
+    setBuffer(content);
     ASSERT_NO_THROW(handleRefreshState(TemperatureSensor::DEVICE_TYPE_TEMP_SENSOR));
     auto devices = httpClientPtr->getGetvices();
     ASSERT_EQ(devices.size(), 4);
@@ -228,7 +220,7 @@ TEST_F(HttpClientTest, handleRefreshState_noThrow) {
     std::ifstream ifs2("mocked_jsons/refreshState-with-param.json"); // load mocked .json
     content.assign((std::istreambuf_iterator<char>(ifs2)), (std::istreambuf_iterator<char>()));
 
-    setBuffer4RefreshStates(content);
+    setBuffer(content);
     ASSERT_NO_THROW(handleRefreshState(TemperatureSensor::DEVICE_TYPE_TEMP_SENSOR));
     devices = httpClientPtr->getGetvices();
     ASSERT_EQ(devices.size(), 4);
@@ -270,7 +262,7 @@ TEST_F(HttpClientTest, handleRefreshState_ThrowEmptyBuffer) {
 
     std::string content = "";
 
-    setBuffer4RefreshStates(content);
+    setBuffer(content);
     EXPECT_THROW(
             {
                 try {
@@ -278,7 +270,7 @@ TEST_F(HttpClientTest, handleRefreshState_ThrowEmptyBuffer) {
                 } catch (const std::runtime_error& e) {
                     // and this tests that it has the correct message (no suitable macro in gtest)
                     EXPECT_STREQ(
-                            "Buffer m_buffer4RefreshStates is empty! Probably got empty response "
+                            "Buffer is empty! Probably got empty response "
                             "from curl.",
                             e.what());
                     throw;
@@ -303,7 +295,7 @@ TEST_F(HttpClientTest, handleRefreshState_ThrowBrokenJson) {
     std::ifstream ifs("mocked_jsons/refreshState-broken.json"); // load mocked .json
     std::string content((std::istreambuf_iterator<char>(ifs)), (std::istreambuf_iterator<char>()));
 
-    setBuffer4RefreshStates(content);
+    setBuffer(content);
     EXPECT_THROW(
             {
                 try {

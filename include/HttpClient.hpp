@@ -13,6 +13,7 @@
 #include "jsoncpp/json/json.h"
 #include <cstddef>
 #include <memory>
+#include <mutex>
 #include <string>
 #include <vector>
 
@@ -43,15 +44,11 @@ private:
 
     std::string m_refreshStateLast;
 
-    // separate buffer for queryAPI of type "GET_DEVICES"
-    std::string m_buffer4GetDevices;
-    static size_t writerCallback4DevicesQuery(char* data, size_t size, size_t nmemb, void* p);
-    size_t writerCallback4DevicesQuery_impl(char* data, size_t size, size_t nmemb);
-
-    // separate buffer for queryAPI of type "REFRESH_STATE"
-    std::string m_buffer4RefreshStates;
-    static size_t writerCallback4RefreshQuery(char* data, size_t size, size_t nmemb, void* p);
-    size_t writerCallback4RefreshQuery_impl(char* data, size_t size, size_t nmemb);
+    // Common buffer for queryAPI of type "REFRESH_STATE" and "GET_DEVICES".
+    std::mutex m_mutex;
+    std::string m_buffer;
+    static size_t writerCallback(char* data, size_t size, size_t nmemb, void* p);
+    size_t writerCallback_impl(char* data, size_t size, size_t nmemb);
 
     void addDevices(const std::string& deviceType);
     void addTemperatureSensors(const Json::Value& root);
